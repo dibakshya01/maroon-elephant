@@ -14,3 +14,9 @@ Running log of the autonomous build. Newest first.
 - M1 Knowledge loader (`kb.py`): importlib.resources JSON loader + crosswalk tuple helpers. Verified.
 - M1 Ingest (`ingest.py`): local/git/zip acquisition; zip extraction refuses traversal + symlinks (dogfood).
 - M1 Detect (`detect.py`): table-driven component detection → inventory/AI-BOM + AT-signal set.
+- M2 MCP server (`maroon serve-mcp`): stdio JSON-RPC 2025-06-18, 4 tools; smoke-tested round-trip.
+- M3 Enterprise edition: deterministic orchestrator (crown-jewels P0/P1/P2, hard agency caps,
+  hash-chained tamper-evident run log), local-host UI (`maroon serve`, stdlib http.server + SSE,
+  vanilla JS, maroon dark theme). Visually verified in-browser: live board + Findings/Inventory/
+  Threat-Model/Governance tabs render; crown-jewels prioritization works; governance verdict shown.
+- 30 tests green; self-scan clean.

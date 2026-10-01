@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maroon Elephant — Enterprise</title>
+<style>
+  :root{
+    --bg:#0f0a0b; --bg2:#160e10; --card:#1c1316; --card2:#231619; --line:#3a2329;
+    --ink:#f3e9eb; --muted:#b79aa1; --maroon:#b0313f; --maroon2:#7d1f2a; --accent:#d8616f;
+    --crit:#ff5c7a; --high:#ff8a4c; --med:#f2c14e; --low:#6cc6d8; --info:#8a8f98; --ok:#49c17c;
+    --radius:14px; --shadow:0 10px 40px rgba(0,0,0,.45);
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#2a1418 0%,var(--bg) 55%);
+    color:var(--ink);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  header .logo{font-size:30px}
+  header h1{font-size:22px;margin:0;letter-spacing:-.02em}
+  header .ver{margin-left:auto;color:var(--muted);font-size:12px;font-family:var(--mono)}
+  .tag{color:var(--muted);font-size:14px;margin:0 0 22px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+  textarea,input,select{width:100%;background:#120c0e;border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:10px 12px;font-family:var(--mono);font-size:13px;resize:vertical}
+  textarea{min-height:88px}
+  .row{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .switch{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+  button{background:linear-gradient(180deg,var(--maroon),var(--maroon2));color:#fff;border:0;
+    border-radius:10px;padding:11px 20px;font-weight:600;font-size:14px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(176,49,63,.35);transition:transform .08s ease,filter .15s}
+  button:hover{filter:brightness(1.08)} button:active{transform:translateY(1px)}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);box-shadow:none}
+  details{border:1px solid var(--line);border-radius:10px;padding:0 14px;margin-top:14px;background:#120c0e}
+  summary{cursor:pointer;padding:12px 0;font-size:13px;color:var(--accent)}
+  details p,details li{font-size:13px;color:var(--muted)}
+  .board{margin-top:22px}
+  .queue{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
+    font-size:12px;border:1px solid var(--line);background:#130d0f}
+  .p0{border-color:#ff5c7a55;color:#ff95a8} .p1{color:var(--muted)} .p2{color:#7d8690}
+  .pill{font-size:11px;padding:2px 7px;border-radius:999px;font-weight:600}
+  .log{font-family:var(--mono);font-size:12px;color:var(--muted);max-height:190px;overflow:auto;
+    background:#0c0809;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:4px}
+  .log .dot{color:var(--accent)}
+  .tabs{display:flex;gap:6px;margin:22px 0 14px;flex-wrap:wrap}
+  .tab{padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:#130d0f;
+    color:var(--muted);cursor:pointer;font-size:13px}
+  .tab.active{background:var(--maroon2);color:#fff;border-color:var(--maroon)}
+  .hidden{display:none}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  td.sev{font-weight:700;white-space:nowrap}
+  .sev-critical{color:var(--crit)} .sev-high{color:var(--high)} .sev-medium{color:var(--med)}
+  .sev-low{color:var(--low)} .sev-info{color:var(--info)}
+  code{font-family:var(--mono);font-size:12px;color:var(--accent)}
+  .ids{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .layers{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+  .layer{min-width:150px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#130d0f}
+  .layer h3{font-size:11px;color:var(--muted);margin:0 0 8px;text-transform:uppercase}
+  .comp{font-size:12px;padding:5px 9px;border-radius:8px;background:#1d1317;margin-bottom:6px;border:1px solid var(--line)}
+  .verdict{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .verdict .big{font-size:26px;font-weight:800;letter-spacing:-.01em}
+  .bad{color:var(--high)} .good{color:var(--ok)}
+  .kv{font-size:13px;color:var(--muted)} .kv b{color:var(--ink)}
+  .counts{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 2px}
+  .count{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+  .empty{color:var(--muted);font-size:13px;padding:10px 0}
+  footer{margin-top:40px;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="logo">🐘</span>
+    <h1>Maroon Elephant</h1>
+    <span class="ver" id="ver">Enterprise</span>
+  </header>
+  <p class="tag">AI-era threat modeling — scan your org worst-first, mapped to OWASP 2026 · MAESTRO · AIVSS.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Targets</h2>
+      <label>Repositories to scan — one per line (local path, git URL, or .zip)</label>
+      <textarea id="targets" placeholder="./my-service&#10;https://github.com/org/payments&#10;https://github.com/org/docs"></textarea>
+      <label>Crown jewels — describe your most critical assets (scanned first, P0)</label>
+      <textarea id="crown" placeholder="The payments service, auth service, and the customer-data pipeline."></textarea>
+      <div class="row">
+        <label class="switch"><input type="checkbox" id="subs" checked style="width:auto"> use sub-scanners (grey-panda)</label>
+        <button id="scanBtn" style="margin-left:auto">▸ Scan</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Bring Your Own Token (BYOK)</h2>
+      <p class="kv">The deterministic core runs <b>entirely on your machine</b> and needs no key.
+        LLM enrichment is <b>optional</b>; when on, it uses <b>your</b> key — stored only in this
+        browser, never sent to any Maroon Elephant server.</p>
+      <label>Provider</label>
+      <select id="provider">
+        <option value="">(none — deterministic only)</option>
+        <option>anthropic</option><option>openai</option><option>google</option>
+        <option>ollama (local, air-gapped)</option>
+      </select>
+      <label>API key (optional, stored in this browser only)</label>
+      <input id="apikey" type="password" placeholder="sk-… (never leaves your machine)">
+      <details>
+        <summary>What is BYOT / BYOK?</summary>
+        <p>“Bring Your Own Token” means you plug in your <b>own</b> API key from an AI provider so
+          your code and data stay under your control — Maroon Elephant never proxies them. You pay
+          your provider directly (usually cents per scan). Set a spend cap in your provider console.
+          Prefer <b>Ollama</b> for a fully local, zero-cost, air-gapped run.</p>
+        <ul>
+          <li><b>Anthropic / OpenAI / Google:</b> create a key in the provider’s console, paste it above.</li>
+          <li><b>Ollama:</b> install Ollama and pull a model — no key, nothing leaves your machine.</li>
+          <li>Leave the provider as “none” to run deterministically with no AI calls at all.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <div class="board card hidden" id="board">
+    <h2>Live scan board</h2>
+    <div class="queue" id="queue"></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div id="resultsWrap" class="hidden">
+    <div class="tabs">
+      <div class="tab active" data-tab="findings">Findings</div>
+      <div class="tab" data-tab="inventory">AI Inventory</div>
+      <div class="tab" data-tab="threat">Threat Model</div>
+      <div class="tab" data-tab="gov">Governance</div>
+    </div>
+    <div class="card">
+      <div id="tab-findings"></div>
+      <div id="tab-inventory" class="hidden"></div>
+      <div id="tab-threat" class="hidden"></div>
+      <div id="tab-gov" class="hidden"></div>
+    </div>
+  </div>
+
+  <footer>Deterministic-first · zero-dependency core · Apache-2.0 · findings carry OWASP/MAESTRO/AIVSS/ATLAS/CWE tags</footer>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
