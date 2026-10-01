@@ -12,6 +12,9 @@ evidence-backed threat findings mapped to the OWASP **LLM Top 10**, **Agentic (A
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](pyproject.toml)
 [![Core deps](https://img.shields.io/badge/runtime%20deps-0-brightgreen.svg)](pyproject.toml)
+[![OWASP 2026](https://img.shields.io/badge/OWASP-2026-b0313f.svg)](Findings.md)
+
+**[Live site & docs →](https://dibakshya01.github.io/maroon-elephant/)**
 
 </div>
 

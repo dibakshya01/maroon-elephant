@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maroon Elephant — AI-era threat modeling that never forgets</title>
+<meta name="description" content="Open-source, deterministic-first threat modeling & repo scanning for the AI era. Detect AI/agentic/MCP risks, map them to OWASP 2026, and get an enterprise governance verdict — zero-dependency, Apache-2.0.">
+<meta property="og:title" content="Maroon Elephant — AI-era threat modeling">
+<meta property="og:description" content="Deterministic-first threat modeling for AI/agentic/MCP systems. OWASP-2026 aligned. Zero-dependency. Apache-2.0.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/social.svg">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0809; --bg2:#140d0f; --card:#1a1114; --card2:#211519; --line:#39222a; --line2:#4a2d35;
+    --ink:#f5ecee; --muted:#bb9ea5; --faint:#8b7278;
+    --maroon:#c13a48; --deep:#6f1a24; --accent:#e07783; --cream:#f6ece0;
+    --crit:#ff5c6c; --high:#ff8a4c; --med:#f0c04a; --ok:#49c17c;
+    --r:16px; --maxw:1100px;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.6;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  .mono{font-family:var(--mono)}
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(13,8,9,.72);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:10px;height:62px}
+  nav .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:17px}
+  nav .brand svg{width:30px;height:30px;border-radius:8px}
+  nav .links{margin-left:auto;display:flex;gap:26px;align-items:center}
+  nav .links a{color:var(--muted);font-size:14px;font-weight:500}
+  nav .links a:hover{color:var(--ink);text-decoration:none}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,var(--maroon),var(--deep));
+    color:#fff;padding:10px 18px;border-radius:11px;font-weight:600;font-size:14px;border:0;cursor:pointer;
+    box-shadow:0 8px 24px rgba(193,58,72,.3)}
+  .btn:hover{filter:brightness(1.08);text-decoration:none}
+  .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--ink);box-shadow:none}
+  /* hero */
+  .hero{position:relative;padding:90px 0 60px;text-align:center;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-30% 0 auto;height:620px;z-index:-1;
+    background:radial-gradient(760px 380px at 50% 8%,rgba(193,58,72,.26),transparent 70%)}
+  .hero .mark{width:94px;height:94px;margin:0 auto 26px;filter:drop-shadow(0 12px 30px rgba(193,58,72,.4))}
+  .eyebrow{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--line2);border-radius:999px;padding:6px 14px;margin-bottom:22px}
+  h1{font-size:clamp(34px,6vw,62px);line-height:1.04;letter-spacing:-.035em;font-weight:900;max-width:14ch;margin:0 auto}
+  h1 .g{background:linear-gradient(120deg,var(--accent),var(--maroon));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:clamp(16px,2.3vw,20px);max-width:60ch;margin:22px auto 0}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+  .install{display:inline-flex;align-items:center;gap:12px;background:#0a0607;border:1px solid var(--line2);
+    border-radius:11px;padding:11px 16px;font-family:var(--mono);font-size:14px;color:var(--ink)}
+  .install .dollar{color:var(--faint)} .install .cp{color:var(--faint);font-size:12px;border-left:1px solid var(--line);padding-left:12px}
+  /* trust strip */
+  .trust{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:46px auto 0;max-width:820px}
+  .trust span{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);
+    border-radius:999px;padding:6px 13px;background:var(--card)}
+  /* sections */
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  .k{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  h2{font-size:clamp(26px,4vw,40px);letter-spacing:-.03em;font-weight:800;line-height:1.1}
+  .lead{color:var(--muted);font-size:18px;max-width:64ch;margin-top:16px}
+  .grid{display:grid;gap:18px;margin-top:38px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:860px){.g3,.g2{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);
+    border-radius:var(--r);padding:24px}
+  .card h3{font-size:18px;letter-spacing:-.01em;margin-bottom:8px;display:flex;align-items:center;gap:9px}
+  .card p{color:var(--muted);font-size:15px}
+  .card .ic{width:30px;height:30px;border-radius:9px;background:rgba(193,58,72,.16);
+    display:grid;place-items:center;color:var(--accent);font-size:16px}
+  /* eli5 */
+  .eli5{background:linear-gradient(180deg,rgba(193,58,72,.07),transparent)}
+  .eli5 .card{border-color:var(--line2)}
+  .eli5 p{font-size:17px;color:var(--ink)}
+  .eli5 .muted{color:var(--muted);font-size:15px}
+  /* pipeline */
+  .pipe{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
+  .step{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .step .n{font-family:var(--mono);color:var(--accent);font-size:12px}
+  .step h4{font-size:15px;margin:6px 0 4px} .step p{color:var(--muted);font-size:13px}
+  /* ecosystem */
+  .eco{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;margin-top:34px}
+  @media(max-width:760px){.eco{grid-template-columns:1fr;text-align:center}}
+  .eco .plus{font-size:26px;color:var(--faint)}
+  /* governance teaser */
+  .verdict{display:flex;gap:26px;align-items:center;flex-wrap:wrap;margin-top:30px;
+    background:#0a0607;border:1px solid var(--line2);border-radius:var(--r);padding:26px}
+  .verdict .big{font-size:30px;font-weight:900;color:var(--high);letter-spacing:-.01em}
+  .verdict .kv{font-size:14px;color:var(--muted)} .verdict .kv b{color:var(--ink)}
+  /* code */
+  pre{background:#0a0607;border:1px solid var(--line);border-radius:12px;padding:18px 20px;overflow:auto;
+    font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#e8dde0}
+  pre .c{color:var(--faint)} pre .p{color:var(--accent)}
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:46px 0;color:var(--muted);font-size:14px}
+  footer .wrap{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  footer a{color:var(--muted)} footer .sp{margin-left:auto}
+  .note{color:var(--faint);font-size:13px;margin-top:10px}
+  @media (prefers-color-scheme: light){
+    :root{--bg:#faf6f4;--bg2:#fff;--card:#fff;--card2:#fdf8f7;--line:#ecdcde;--line2:#e2c9ce;
+      --ink:#1a1012;--muted:#6b5257;--faint:#9a8389;--maroon:#a3283a;--deep:#7d1f2a;--accent:#b1313f}
+    nav{background:rgba(250,246,244,.8)}
+    .install,pre,.verdict{background:#fff}
+  }
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <span class="brand">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c13a48"/><stop offset="1" stop-color="#6f1a24"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#t)"/><g fill="#f6ece0"><ellipse cx="14" cy="27" rx="10.5" ry="14"/><ellipse cx="50" cy="27" rx="10.5" ry="14"/><path d="M19 25 Q19 13 32 13 Q45 13 45 25 L45 33 Q45 42 32 42 Q19 42 19 33 Z"/><path d="M28.5 38 C27.5 47 28.5 53 30 56 C31.6 59 36 57.5 35 52.5 C34.3 49.5 33.5 45 35.5 38 Z"/><path d="M25.5 41 Q23.5 47 25.5 50.5 Q27.6 48.5 28 42.5 Z"/><path d="M38.5 41 Q40.5 47 38.5 50.5 Q36.4 48.5 36 42.5 Z"/></g><circle cx="26" cy="25" r="2.1" fill="#6f1a24"/><circle cx="38" cy="25" r="2.1" fill="#6f1a24"/></svg>
+    Maroon Elephant
+  </span>
+  <span class="links">
+    <a href="#why">Why</a>
+    <a href="#eli5">ELI5</a>
+    <a href="#how">How it works</a>
+    <a href="#quickstart">Quickstart</a>
+    <a href="https://github.com/dibakshya01/maroon-elephant">GitHub ↗</a>
+  </span>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <svg class="mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c13a48"/><stop offset="1" stop-color="#6f1a24"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#h)"/><g fill="#f6ece0"><ellipse cx="14" cy="27" rx="10.5" ry="14"/><ellipse cx="50" cy="27" rx="10.5" ry="14"/><path d="M19 25 Q19 13 32 13 Q45 13 45 25 L45 33 Q45 42 32 42 Q19 42 19 33 Z"/><path d="M28.5 38 C27.5 47 28.5 53 30 56 C31.6 59 36 57.5 35 52.5 C34.3 49.5 33.5 45 35.5 38 Z"/><path d="M25.5 41 Q23.5 47 25.5 50.5 Q27.6 48.5 28 42.5 Z"/><path d="M38.5 41 Q40.5 47 38.5 50.5 Q36.4 48.5 36 42.5 Z"/></g><circle cx="26" cy="25" r="2.2" fill="#6f1a24"/><circle cx="38" cy="25" r="2.2" fill="#6f1a24"/></svg>
+  <span class="eyebrow">OWASP 2026 · MAESTRO · AIVSS</span>
+  <h1>Threat modeling for the AI era <span class="g">that never forgets.</span></h1>
+  <p class="sub">Point it at a repo. Maroon Elephant detects your AI, agentic, and MCP components,
+    maps every risk to the OWASP 2026 standards, and hands you an enterprise governance verdict —
+    <b>deterministic-first</b>, <b>zero-dependency</b>, <b>local-first</b>.</p>
+  <div class="cta">
+    <span class="install mono"><span class="dollar">$</span> pip install maroon-elephant<span class="cp">copy</span></span>
+    <a class="btn" href="#quickstart">Get started →</a>
+  </div>
+  <div class="trust">
+    <span>LLM Top 10</span><span>Agentic ASI01–10</span><span>GenAI Data Security</span>
+    <span>MCP security</span><span>MITRE ATLAS</span><span>SARIF 2.1.0</span>
+    <span>CycloneDX AI-BOM</span><span>0 runtime deps</span><span>Apache-2.0</span>
+  </div>
+</div></header>
+
+<section id="why"><div class="wrap">
+  <div class="k">The problem</div>
+  <h2>AI collapsed the data plane and the control plane.</h2>
+  <p class="lead">LLMs read instructions and data from one flat token stream — the root cause behind
+    prompt injection, data exfiltration, excessive agency, and memory poisoning. The market is full of
+    <i>runtime</i> products, but there's no strong open-source, <b>repo-driven, design-time</b> threat
+    modeler for AI systems. That's the gap.</p>
+  <div class="grid g3">
+    <div class="card"><h3><span class="ic">🔍</span> Detect</h3><p>Fingerprint LangChain, LangGraph, CrewAI, MCP servers, vector DBs, model SDKs — and build an AI inventory / AI-BOM.</p></div>
+    <div class="card"><h3><span class="ic">🧠</span> Model</h3><p>Infer the architecture, place components on MAESTRO's 7 layers, and produce a design-time threat model as code.</p></div>
+    <div class="card"><h3><span class="ic">⚖️</span> Govern</h3><p>Score with AIVSS and place the repo on the AT×L governance matrix — from "Well-governed" to "DO NOT DEPLOY".</p></div>
+  </div>
+</div></section>
+
+<section id="eli5" class="eli5"><div class="wrap">
+  <div class="k">Explain it like I'm five</div>
+  <h2>What does it actually do?</h2>
+  <div class="grid g2">
+    <div class="card">
+      <p>🐘 Imagine a very careful elephant that reads your code and asks: <i>“If this app uses AI, how
+        could someone trick it or steal from it?”</i></p>
+      <p class="muted" style="margin-top:12px">It doesn't guess. It looks for exact, known-risky patterns —
+        a password typed into the code, an AI that can run shell commands, a tool that auto-approves
+        dangerous actions — and points at the exact line.</p>
+    </div>
+    <div class="card">
+      <p>Then it writes you a <b>report card</b>: what AI you're running, what could go wrong (in plain
+        standards everyone trusts), and one clear next step to be safer.</p>
+      <p class="muted" style="margin-top:12px">Your code never leaves your machine. The AI parts are
+        optional — the careful elephant works entirely offline.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="k">How it works</div>
+  <h2>Deterministic first. The LLM is a garnish, never the meal.</h2>
+  <p class="lead">Every finding comes from the deterministic engine with <span class="mono">file:line</span>
+    evidence and a stable fingerprint. The optional LLM layer can only <i>describe</i> a finding that
+    already exists — it can never invent one. That's what makes the output auditable.</p>
+  <div class="pipe">
+    <div class="step"><div class="n">01</div><h4>Ingest</h4><p>Local path, git URL, or uploaded zip — safely (no path traversal).</p></div>
+    <div class="step"><div class="n">02</div><h4>Detect</h4><p>Component inventory → AI-BOM + the system's adoption-tier signals.</p></div>
+    <div class="step"><div class="n">03</div><h4>Analyze</h4><p>Rules + AST taint + Lethal-Trifecta + Grey Panda, merged & deduped.</p></div>
+    <div class="step"><div class="n">04</div><h4>Score</h4><p>AIVSS severity + the AT×L governance verdict.</p></div>
+    <div class="step"><div class="n">05</div><h4>Report</h4><p>SARIF · CycloneDX AI-BOM · threat-model-as-code · governance.</p></div>
+  </div>
+  <div class="verdict">
+    <div><div class="big">CRITICAL&nbsp;GAP</div></div>
+    <div class="kv">Adoption tier <b>AT6</b> — Externally-Extended (MCP, third-party tools)</div>
+    <div class="kv">Maturity <b>L0</b> — Ad Hoc</div>
+    <div class="kv" style="flex-basis:100%">→ Raise maturity: the highest-leverage missing control is <b>dependency pinning</b>.</div>
+  </div>
+  <p class="note">Every finding carries a full cross-framework tuple: OWASP LLM/ASI/DSGAI · MAESTRO layer · AIVSS · NHI · MITRE ATLAS/ATT&CK · CWE · NIST · regulatory.</p>
+</div></section>
+
+<section id="ecosystem"><div class="wrap">
+  <div class="k">The ecosystem</div>
+  <h2>Two animals, one mission.</h2>
+  <div class="eco">
+    <div class="card"><h3>🐼 Grey Panda</h3><p>The calm, deterministic, in-the-file guardian — regex + AST, OWASP-tagged, ships its own MCP server. The ground truth.</p></div>
+    <div class="plus">+</div>
+    <div class="card"><h3>🐘 Maroon Elephant</h3><p>The orchestrating, design-time, multi-repo threat-modeler that stands on top — architecture, governance, GitHub, and a UI.</p></div>
+  </div>
+</div></section>
+
+<section id="quickstart"><div class="wrap">
+  <div class="k">Quickstart</div>
+  <h2>Running in under a minute.</h2>
+  <div class="grid g2">
+    <div>
+      <h3 style="margin-bottom:10px">CLI</h3>
+<pre><span class="c"># scan a repo, ranked report in seconds</span>
+<span class="p">$</span> maroon scan .
+<span class="p">$</span> maroon scan https://github.com/org/repo
+<span class="c"># CI-ready: SARIF + exit codes</span>
+<span class="p">$</span> maroon scan . -f sarif -o results.sarif --fail-on high</pre>
+    </div>
+    <div>
+      <h3 style="margin-bottom:10px">Enterprise dashboard</h3>
+<pre><span class="c"># local web UI — scan an org, worst-first</span>
+<span class="p">$</span> maroon serve
+<span class="c"># its own MCP server, for agents & IDEs</span>
+<span class="p">$</span> maroon serve-mcp</pre>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:18px">
+    <div class="card"><h3>GitHub Action</h3><p>Drop-in workflow → SARIF in the Security tab + PR annotations. Public repos free.</p></div>
+    <div class="card"><h3>VS Code</h3><p>Inline diagnostics with OWASP tags and the governance verdict in your status bar.</p></div>
+    <div class="card"><h3>BYOK & air-gapped</h3><p>Bring your own key (or a local model). Keys never leave your machine; air-gapped mode makes zero external calls.</p></div>
+  </div>
+</div></section>
+
+<section id="docs"><div class="wrap">
+  <div class="k">Docs & standards</div>
+  <h2>Honest about what it can — and can't — do.</h2>
+  <p class="lead">Static analysis, Python-first deep coverage, governance checks that say
+    “needs attestation” rather than faking a pass. Read the research and the spec:</p>
+  <div class="grid g3">
+    <div class="card"><h3>Findings</h3><p>The research synthesis — the full AI threat corpus & competitive landscape. <a href="https://github.com/dibakshya01/maroon-elephant/blob/main/Findings.md">Read →</a></p></div>
+    <div class="card"><h3>Build Plan</h3><p>The engineering spec — architecture, determinism contracts, roadmap. <a href="https://github.com/dibakshya01/maroon-elephant/blob/main/Build%20Plan.md">Read →</a></p></div>
+    <div class="card"><h3>Can &amp; Cannot</h3><p>The honest limits, written before the code. <a href="https://github.com/dibakshya01/maroon-elephant/blob/main/docs/CAN_AND_CANNOT.md">Read →</a></p></div>
+  </div>
+</div></section>
+
+<footer id="contact"><div class="wrap">
+  <span class="brand mono">🐘 Maroon Elephant</span>
+  <a href="https://github.com/dibakshya01/maroon-elephant">GitHub</a>
+  <a href="https://github.com/dibakshya01/maroon-elephant/issues">Issues</a>
+  <a href="https://github.com/dibakshya01/grey-panda">Grey Panda</a>
+  <span class="sp">Apache-2.0 · built for the OWASP GenAI era</span>
+</div></footer>
+</body>
+</html>
