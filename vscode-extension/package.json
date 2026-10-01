@@ -1,0 +1,26 @@
+{
+  "name": "maroon-elephant",
+  "displayName": "Maroon Elephant",
+  "description": "AI-era threat modeling & repo scanning (OWASP-2026) — inline diagnostics from the maroon CLI.",
+  "version": "0.1.0",
+  "publisher": "dibakshya01",
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "https://github.com/dibakshya01/maroon-elephant" },
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Linters", "Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "maroon.scanWorkspace", "title": "Maroon Elephant: Scan Workspace" },
+      { "command": "maroon.clear", "title": "Maroon Elephant: Clear Findings" }
+    ],
+    "configuration": {
+      "title": "Maroon Elephant",
+      "properties": {
+        "maroon.command": { "type": "string", "default": "maroon", "description": "Path to the maroon CLI." },
+        "maroon.scanOnSave": { "type": "boolean", "default": false, "description": "Re-scan the workspace on save." }
+      }
+    }
+  }
+}
