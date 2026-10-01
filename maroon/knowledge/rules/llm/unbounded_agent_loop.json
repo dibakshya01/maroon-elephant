@@ -1,0 +1,22 @@
+{
+  "id": "ME-LLM06-unbounded-agent",
+  "title": "Agent loop without iteration/cost limit",
+  "detector": "regex",
+  "severity": "medium",
+  "confidence": "medium",
+  "primary": "LLM06",
+  "also": [
+    "ASI08"
+  ],
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "AgentExecutor\\s*\\(",
+      "message": "AgentExecutor without max_iterations can loop/fan-out unboundedly."
+    }
+  ],
+  "exclude_if_line_matches": "(max_iterations|max_execution_time|maroon:\\s*ignore)",
+  "remediation": "Set max_iterations / recursion / time / cost caps and a circuit breaker on agent loops."
+}

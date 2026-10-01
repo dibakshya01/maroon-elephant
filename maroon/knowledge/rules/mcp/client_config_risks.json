@@ -1,0 +1,22 @@
+{
+  "id": "ME-MCP-client-config",
+  "title": "Risky MCP client configuration",
+  "detector": "config_mcp",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "ASI04",
+  "also": [
+    "LLM01",
+    "LLM03"
+  ],
+  "params": {
+    "risky_keys": [
+      "autoApprove",
+      "alwaysAllow",
+      "dangerously-skip-permissions",
+      "yolo"
+    ]
+  },
+  "message": "Risky MCP client configuration.",
+  "remediation": "Pin MCP server versions + verify checksums; keep HITL on; store secrets in a vault, not inline; use TLS; connect only to registry-approved servers."
+}

@@ -1,0 +1,22 @@
+{
+  "id": "ME-MCP-server-transport",
+  "title": "MCP server transport hardening",
+  "detector": "regex",
+  "severity": "medium",
+  "confidence": "medium",
+  "primary": "ASI04",
+  "also": [
+    "LLM01"
+  ],
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "(0\\.0\\.0\\.0|host\\s*=\\s*[\\\"']0\\.0\\.0\\.0[\\\"'])",
+      "message": "MCP/HTTP server binding to 0.0.0.0 \u2014 bind to 127.0.0.1 for local servers and validate the Origin header."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Bind local MCP servers to 127.0.0.1, validate the Origin header (DNS-rebinding), require TLS + OAuth 2.1 for remote; never forward client tokens downstream."
+}

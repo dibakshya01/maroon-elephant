@@ -1,0 +1,18 @@
+{
+  "id": "ME-ASI01-lethal-trifecta",
+  "title": "Lethal Trifecta (untrusted input + sensitive data + egress)",
+  "detector": "trifecta",
+  "severity": "high",
+  "confidence": "medium",
+  "primary": "ASI01",
+  "also": [
+    "LLM01"
+  ],
+  "message": "Untrusted input + sensitive-data access + external communication around an LLM call.",
+  "remediation": "Apply the Rule of Two: an agent/session should hold at most two of {untrusted input, sensitive data, external comms} without human approval. Segment contexts; gate egress.",
+  "languages": [
+    "python",
+    "javascript",
+    "typescript"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "ME-ASI05-code-exec-tool",
+  "title": "Agent code-execution tool",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "medium",
+  "primary": "ASI05",
+  "also": [
+    "LLM10"
+  ],
+  "patterns": [
+    {
+      "pattern": "(PythonREPLTool|PythonAstREPLTool|ShellTool|python_repl|code_interpreter|run_shell|exec_code|CodeInterpreterTool)",
+      "message": "Code/shell execution tool exposed to an agent \u2014 sandbox it, never run as root, separate codegen from execution."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Run code-exec tools in a network-restricted sandbox/container as non-root; require HITL for elevated runs; static-scan generated code before execution.",
+  "languages": [
+    "python",
+    "javascript",
+    "typescript"
+  ]
+}

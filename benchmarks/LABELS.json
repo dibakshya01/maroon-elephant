@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "description": "Pre-registered benchmark labels (Build Plan §19.5). The positive set is fixed BEFORE rule tuning; recall denominator = this set. Fixtures live in benchmarks/fixtures/.",
+    "version": "1"
+  },
+  "vuln_app": {
+    "must_fire_rules": [
+      "ME-LLM10-model-output-sink",
+      "ME-LLM04-unsafe-deserialization",
+      "ME-LLM04-unpinned-model-ref",
+      "ME-LLM08-hardcoded-secret",
+      "ME-LLM06-unbounded-agent",
+      "ME-ASI05-code-exec-tool",
+      "ME-ASI02-hitl-bypass",
+      "ME-ASI01-lethal-trifecta",
+      "ME-LLM09-vector-retrieval",
+      "ME-DSGAI12-nl-sql-gateway",
+      "ME-DSGAI05-archive-extract",
+      "ME-MCP-client-config",
+      "ME-MCP-server-transport",
+      "ME-SCA-known-cve"
+    ],
+    "expected_tier": "AT6",
+    "expected_verdict": "CRITICAL GAP"
+  },
+  "clean_app": {
+    "must_fire_rules": [],
+    "max_findings": 0
+  }
+}

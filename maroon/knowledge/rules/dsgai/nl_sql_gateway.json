@@ -1,0 +1,24 @@
+{
+  "id": "ME-DSGAI12-nl-sql-gateway",
+  "title": "Unsafe natural-language \u2192 SQL/graph gateway",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "DSGAI12",
+  "also": [
+    "LLM10"
+  ],
+  "patterns": [
+    {
+      "pattern": "(SQLDatabaseChain|create_sql_agent|GraphCypherQAChain|create_sql_query_chain|NLSQLTableQueryEngine|text_to_sql)",
+      "message": "LLM-generated SQL/graph query over a (likely privileged) connection \u2014 prompt-to-query injection + privilege amplification (CVE-2024-8309)."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Use whitelisted stored procedures / parameterized templates; enforce row/column-level security at the DB; cap result-set size; never run generated SQL on a privileged account.",
+  "languages": [
+    "python",
+    "javascript",
+    "typescript"
+  ]
+}

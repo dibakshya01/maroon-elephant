@@ -1,0 +1,23 @@
+{
+  "id": "ME-LLM09-vector-retrieval",
+  "title": "Vector retrieval \u2014 verify server-side tenant scoping",
+  "detector": "regex",
+  "severity": "medium",
+  "confidence": "low",
+  "primary": "LLM09",
+  "also": [
+    "DSGAI13",
+    "DSGAI11"
+  ],
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "(similarity_search\\s*\\(|\\.as_retriever\\s*\\(|\\.query\\s*\\(\\s*vector|collection\\.query\\s*\\()",
+      "message": "Vector similarity search \u2014 enforce tenant/ACL scoping INSIDE the index query (server-side), never post-retrieval; don't return raw scores."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Scope retrieval by tenant/ACL inside the index query; per-tenant namespaces; don't expose raw similarity scores (membership oracle)."
+}

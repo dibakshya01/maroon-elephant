@@ -1,0 +1,13 @@
+{
+  "id": "ME-SCA-known-cve",
+  "title": "Dependency with a known AI/MCP exploit",
+  "detector": "dependency_cve",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "LLM04",
+  "also": [
+    "ASI04"
+  ],
+  "message": "A declared dependency matches a known AI/agentic/MCP exploit fingerprint.",
+  "remediation": "Upgrade past the affected version; pin + verify; add SCA (OSV-Scanner) to CI."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "ME-LLM10-model-output-sink",
+  "title": "Model output flows into a dangerous sink",
+  "detector": "python_ast_taint",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "LLM10",
+  "also": [
+    "ASI05",
+    "LLM03"
+  ],
+  "message": "LLM/model output reaches a code/command/SQL execution sink.",
+  "remediation": "Treat model output as untrusted. Validate against a strict schema and use parameterized queries / safe APIs; never pass model output to exec/eval/shell/raw SQL."
+}

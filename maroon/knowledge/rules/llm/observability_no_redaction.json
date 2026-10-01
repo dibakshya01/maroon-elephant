@@ -1,0 +1,19 @@
+{
+  "id": "ME-LLM02-observability-logging",
+  "title": "LLM observability may log full prompts/outputs",
+  "detector": "regex",
+  "severity": "medium",
+  "confidence": "low",
+  "primary": "LLM02",
+  "also": [
+    "DSGAI14"
+  ],
+  "patterns": [
+    {
+      "pattern": "(import\\s+langfuse|from\\s+langfuse|import\\s+langsmith|from\\s+langsmith|LANGCHAIN_TRACING_V2|LANGSMITH_API_KEY|import\\s+helicone|from\\s+helicone|import\\s+arize|from\\s+arize|import\\s+traceloop|from\\s+traceloop|openllmetry)",
+      "message": "LLM observability SDK present \u2014 ensure prompts/completions/traces are redacted before logging."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Default to least-logging; redact secrets/PII from prompts, completions, and reasoning traces before they reach the observability store."
+}

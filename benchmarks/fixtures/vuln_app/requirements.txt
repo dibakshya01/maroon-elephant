@@ -1,0 +1,5 @@
+langchain==0.2.0
+openai>=1.0
+transformers>=4.40
+qdrant-client==1.8.0
+vllm==0.6.0

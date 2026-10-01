@@ -302,7 +302,7 @@ Knowledge-pack cadence tracking OWASP/ATLAS/AIVSS; community rules; language exp
 ## 17. Immediate next actions (first PR-sized chunks)
 
 1. `git init`, Apache-2.0, scaffold (`maroon/`, `knowledge/`, `benchmarks/`, `docs/`), CI; add ME-scans-itself CI job.
-2. Encode **crosswalk + CVE fingerprint DB + AT×L matrix** as YAML from Findings (pure data, high value, low risk) — plus `vocab/greypanda.yaml` mapping to Grey Panda control IDs.
+2. Encode **crosswalk + CVE fingerprint DB + AT×L matrix** as JSON from Findings (pure data, high value, low risk) — plus `vocab/greypanda.json` mapping to Grey Panda control IDs.
 3. CLI skeleton + SARIF emitter + `ingest` (incl. zip upload).
 4. **Grey Panda `subscan` adapter** (spawn `gp mcp`, call `greypanda_scan_path` JSON; CLI SARIF fallback) — fastest path to real, citeable findings on day one.
 5. `detect` fingerprint library (LangChain/LangGraph/CrewAI/MCP/vector DBs/model SDKs) → AI-BOM (extend `gp agbom`).
@@ -404,7 +404,7 @@ Two **versioned knowledge-pack classifiers** (`knowledge/maturity/at_x_l.json`),
 
 ### 19.3 Grey Panda adapter contract (B3 — pinned)
 - **Version floor:** `grey-panda >= 1.0.6` (MCP launch-ready); tested against **1.0.7**; **MCP protocol `2025-06-18`** (negotiate down to `2025-03-26`/`2024-11-05`). Detected via `gp --version`; skew below floor ⇒ adapter disables itself with a logged warning, native-only run proceeds.
-- **Consumed schema** (`greypanda_scan_path` with `format="json"`): `findings[]` where each finding = `{rule_id, owasp_id, severity, title, description, remediation, file, line, snippet, sdk}`. The adapter maps this into ME's finding model and recomputes ME's own fingerprint (§19.1) from `file`+`snippet`.
+- **Consumed schema** (`greypanda_scan_path` with `format="json"`): `findings[]` where each finding = `{rule_id, owasp_id, severity, title, description, remediation, file, line, snippet, sdk}`. The adapter maps this into ME's finding model and recomputes ME's own `correlation_key`/`fingerprint` per §19.1 by **re-reading the file at `file`+`line`** (never from GP's `snippet`); the final `fingerprint` is assigned by the post-merge pass.
 - **Invocation order:** (1) in-process import `greypanda.scanner.engine` if importable; else (2) `gp mcp` stdio JSON-RPC; else (3) CLI `gp scan --format json`. First available wins. SARIF is taken only from CLI (`--format sarif`) when ME needs grey-panda's native SARIF; otherwise ME emits its own.
 - **Dedup precedence:** on equal **`correlation_key`** (§19.1, rule_id-free; Grey Panda's `evidence_digest` is recomputed from the file at `line`, not from GP's `snippet`, so inputs are identical), the findings merge into one; **ME-native rule metadata is authoritative for the crosswalk tuple** and provides the `canonical_rule_id`, Grey Panda is recorded as a corroborating entry in `sources[]` and contributes its `owasp_id` into the tuple's union. Neither is dropped.
 - **Tag reconciliation:** `knowledge/vocab/greypanda.json` maps Grey Panda control ids → ME canonical ids. On disagreement, take the **union** and tag each id with its source; never silently overwrite.

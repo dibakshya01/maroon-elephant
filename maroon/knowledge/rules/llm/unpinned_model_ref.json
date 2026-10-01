@@ -1,0 +1,23 @@
+{
+  "id": "ME-LLM04-unpinned-model-ref",
+  "title": "Unpinned model/artifact reference",
+  "detector": "regex",
+  "severity": "medium",
+  "confidence": "medium",
+  "primary": "LLM04",
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "\\.from_pretrained\\s*\\(",
+      "message": "from_pretrained without revision= pins to a mutable ref (namespace-reuse/rug-pull risk)."
+    },
+    {
+      "pattern": "[\\\"'][\\w./-]+:latest[\\\"']",
+      "message": "Mutable ':latest' tag \u2014 pin to an immutable digest."
+    }
+  ],
+  "exclude_if_line_matches": "(revision\\s*=|maroon:\\s*ignore)",
+  "remediation": "Pin models/images to an immutable commit SHA or digest; verify signatures (Sigstore/cosign)."
+}

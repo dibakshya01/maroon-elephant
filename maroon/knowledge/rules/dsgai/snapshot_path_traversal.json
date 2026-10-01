@@ -1,0 +1,22 @@
+{
+  "id": "ME-DSGAI05-archive-extract",
+  "title": "Unsafe archive extraction (path traversal)",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "medium",
+  "primary": "DSGAI05",
+  "also": [
+    "DSGAI13"
+  ],
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "\\.extractall\\s*\\(",
+      "message": "Archive extractall() without member validation enables path traversal / symlink writes (CVE-2024-3584 class)."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Validate each archive member: reject absolute paths, '..', and symlinks; extract into a sandboxed dir and verify each path stays within it."
+}

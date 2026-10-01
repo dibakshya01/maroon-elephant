@@ -1,0 +1,23 @@
+# .maroonignore — paths Maroon Elephant skips when scanning THIS repo.
+# Glob patterns, gitignore-ish. A directory excludes everything under it.
+
+# Intentionally-vulnerable test fixtures and the test corpus are not product source
+# (they deliberately contain the patterns the scanner looks for).
+benchmarks/fixtures
+tests
+
+# Prose research/spec docs and generated site/docs (not code under analysis).
+Findings.md
+Build Plan.md
+site
+docs
+
+# Detection-pattern & knowledge definitions. These files ENUMERATE the very attack
+# patterns/keywords the scanner looks for, so pattern-based rules match them by
+# construction (the classic "scanning the scanner" false positive). Excluding them is
+# standard practice (cf. Semgrep's .semgrepignore). The real attack surface of Maroon
+# Elephant — ingest, engine, model, cli, reporters, ui, github, mcpserver — IS scanned.
+maroon/knowledge
+maroon/analyzer.py
+maroon/taint.py
+maroon/detect.py

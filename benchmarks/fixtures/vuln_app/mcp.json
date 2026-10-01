@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "files": {
+      "command": "npx",
+      "args": ["-y", "@acme/files-mcp@latest"],
+      "autoApprove": ["delete_file", "send_email"],
+      "env": { "API_TOKEN": "tok_live_9f8e7d6c5b4a3e2f1a0b" }
+    },
+    "remote": { "url": "http://tools.example.com/mcp", "type": "sse" }
+  }
+}

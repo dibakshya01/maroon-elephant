@@ -1,0 +1,47 @@
+{
+  "id": "ME-LLM04-unsafe-deserialization",
+  "title": "Unsafe deserialization / model loading",
+  "detector": "unsafe_deser",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "LLM04",
+  "also": [
+    "LLM05",
+    "DSGAI04"
+  ],
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "\\bpickle\\.loads?\\s*\\(",
+      "message": "pickle.load executes arbitrary code on load (CWE-502)."
+    },
+    {
+      "pattern": "\\bdill\\.loads?\\s*\\(",
+      "message": "dill.load executes arbitrary code on load."
+    },
+    {
+      "pattern": "\\bjoblib\\.load\\s*\\(",
+      "message": "joblib.load can execute pickled code."
+    },
+    {
+      "pattern": "\\btorch\\.load\\s*\\(",
+      "message": "torch.load without weights_only=True can execute code (CVE-2025-32434)."
+    },
+    {
+      "pattern": "\\byaml\\.load\\s*\\(",
+      "message": "yaml.load without SafeLoader can execute code."
+    },
+    {
+      "pattern": "trust_remote_code\\s*=\\s*True",
+      "message": "trust_remote_code=True runs arbitrary model repo code."
+    },
+    {
+      "pattern": "numpy\\.load\\s*\\([^)]*allow_pickle\\s*=\\s*True",
+      "message": "numpy.load(allow_pickle=True) can execute code."
+    }
+  ],
+  "exclude_if_line_matches": "(weights_only\\s*=\\s*True|SafeLoader|Loader\\s*=\\s*yaml\\.SafeLoader|maroon:\\s*ignore)",
+  "remediation": "Use safe loaders: torch.load(weights_only=True), yaml.safe_load, safetensors; never unpickle untrusted artifacts; pin + verify model provenance."
+}

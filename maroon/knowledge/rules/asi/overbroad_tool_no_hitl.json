@@ -1,0 +1,25 @@
+{
+  "id": "ME-ASI02-hitl-bypass",
+  "title": "Human-in-the-loop bypass / auto-approve",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "LLM03",
+  "also": [
+    "ASI02",
+    "ASI09"
+  ],
+  "patterns": [
+    {
+      "pattern": "(?i)(autoApprove|alwaysAllow|dangerously-skip-permissions|--yolo|auto_approve\\s*=\\s*True|require_approval\\s*=\\s*False)",
+      "message": "Auto-approve / HITL bypass on tool execution \u2014 high-impact actions run without confirmation."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Require explicit human confirmation for irreversible/high-impact actions; enforce authorization in deterministic code, not in the prompt.",
+  "languages": [
+    "python",
+    "javascript",
+    "typescript"
+  ]
+}
