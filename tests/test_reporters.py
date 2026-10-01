@@ -13,6 +13,17 @@ def _result():
     return engine.scan(FIX, with_subscanners=False)
 
 
+def test_sarif_validates_against_schema():
+    """FR-8: SARIF validates against a (structural) SARIF 2.1.0 schema. jsonschema is a
+    dev-only dependency; the runtime core stays zero-dep."""
+    import pytest
+    jsonschema = pytest.importorskip("jsonschema")
+    schema = json.load(open(os.path.join(ROOT, "tests", "schemas", "sarif-2.1.0.min.json")))
+    r = _result()
+    doc = json.loads(sarif.dumps(r.findings, repo_name=r.name))
+    jsonschema.validate(doc, schema)
+
+
 def test_sarif_structure():
     r = _result()
     doc = json.loads(sarif.dumps(r.findings, repo_name=r.name))

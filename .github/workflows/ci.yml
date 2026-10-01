@@ -1,0 +1,40 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.9', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4          # TODO pin by SHA before release
+      - uses: actions/setup-python@v5      # TODO pin by SHA before release
+        with: { python-version: '${{ matrix.python }}' }
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+  self-scan:
+    # Dogfood: Maroon Elephant scans itself and publishes its AT x L result.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -e .
+      - name: Self-scan (must be clean; fail on High+)
+        run: maroon scan . --fail-on high -f sarif -o maroon.sarif
+      - name: Governance verdict
+        if: always()
+        run: maroon scan . -f tmac | python -c "import sys,json; g=json.load(sys.stdin)['governance']; print('Maroon Elephant governance:', g['adoption_tier'],'x',g['governance_level'],'->',g['verdict'])"
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3   # TODO pin by SHA before release
+        with:
+          sarif_file: maroon.sarif
+          category: maroon-elephant

@@ -1,0 +1,22 @@
+# Drop this into .github/workflows/maroon.yml in YOUR repo to scan on every push/PR.
+name: Maroon Elephant
+on: [push, pull_request]
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF to code scanning
+jobs:
+  threat-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Maroon Elephant scan
+        uses: dibakshya01/maroon-elephant@v1   # pin by SHA in production
+        with:
+          path: .
+          output: maroon.sarif
+          fail-on: high
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: maroon.sarif
+          category: maroon-elephant

@@ -1,0 +1,44 @@
+name: 'Maroon Elephant'
+description: 'AI-era threat modeling & repo scanning (OWASP-2026: LLM / Agentic / Data Security / MCP). Emits SARIF 2.1.0.'
+author: 'Maroon Elephant contributors'
+branding:
+  icon: 'shield'
+  color: 'purple'
+inputs:
+  path:
+    description: 'Path to scan.'
+    required: false
+    default: '.'
+  output:
+    description: 'SARIF output file path.'
+    required: false
+    default: 'maroon.sarif'
+  fail-on:
+    description: 'Fail the job if any finding is at/above this severity (info|low|medium|high|critical). Empty = never fail.'
+    required: false
+    default: ''
+  baseline:
+    description: 'Optional prior SARIF file for diff-aware scanning (fail only on new findings).'
+    required: false
+    default: ''
+outputs:
+  sarif:
+    description: 'Path to the generated SARIF file.'
+    value: ${{ inputs.output }}
+runs:
+  using: 'composite'
+  steps:
+    # NOTE: pin third-party actions by full commit SHA before publishing (see HANDOFF.md).
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install Maroon Elephant
+      shell: bash
+      run: pip install --quiet maroon-elephant
+    - name: Scan
+      shell: bash
+      run: |
+        ARGS=""
+        [ -n "${{ inputs.fail-on }}" ] && ARGS="$ARGS --fail-on ${{ inputs.fail-on }}"
+        [ -n "${{ inputs.baseline }}" ] && ARGS="$ARGS --baseline ${{ inputs.baseline }}"
+        maroon scan "${{ inputs.path }}" -f sarif -o "${{ inputs.output }}" $ARGS

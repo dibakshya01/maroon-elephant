@@ -1,0 +1,7 @@
+- id: maroon-elephant
+  name: Maroon Elephant (AI threat model)
+  description: Scan for AI/agentic/MCP + OWASP-2026 issues before commit.
+  entry: maroon scan
+  args: ["--fail-on", "high", "."]
+  language: python
+  pass_filenames: false
