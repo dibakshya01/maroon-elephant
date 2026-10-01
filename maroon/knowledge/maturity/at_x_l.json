@@ -1,0 +1,72 @@
+{
+  "_meta": {
+    "description": "Deterministic AT x L governance classifier (OWASP State of Agentic AI Security & Governance v2). AT-tier from detected composition patterns (worst-case = highest triggered rule). L-maturity from present/absent detectable controls. Verdict = matrix cell.",
+    "version": "2026.1",
+    "not_to_conflate": "Grey Panda 'gp verify' AISVS L1/2/3 is a verification-depth axis, reported separately from this governance L0-L4 maturity axis."
+  },
+  "adoption_tiers": {
+    "AT0": "Shadow AI (unmanaged, personal/consumer GenAI on org data)",
+    "AT1": "Vendor-Embedded Assistant (Copilot/Einstein in a procured product)",
+    "AT2": "Platform-Integrated (custom GPTs, Amazon Q, Vertex Agents)",
+    "AT3": "Citizen-Developer Agent (low-code: Copilot Studio, Power Automate+AI)",
+    "AT4": "Code-Executing Agent (interpreter/shell tools: Claude Code, Devin, Open Interpreter)",
+    "AT5": "Custom In-House (LangChain/LangGraph/AutoGen/Bedrock, self-hosted)",
+    "AT6": "Externally-Extended (MCP servers, third-party tools/APIs/plugins)",
+    "AT7": "Multi-Agent Orchestration (CrewAI/AutoGen teams/LangGraph graphs)",
+    "AT8": "Federated / Cross-Boundary (cross-org, federated, marketplace agents)"
+  },
+  "at_classifier": {
+    "_rule": "Repo tier = highest AT whose 'when' matches the detected inventory. Rules listed worst-first; first match wins.",
+    "rules": [
+      { "tier": "AT8", "when_any": ["a2a_cross_org", "federated_agents", "agent_marketplace"] },
+      { "tier": "AT7", "when_any": ["multi_agent_orchestration", "crewai_crew", "autogen_groupchat", "langgraph_multi_node", "agent_spawning"] },
+      { "tier": "AT6", "when_any": ["mcp_client_config", "mcp_server", "third_party_tool_registry", "external_plugin"] },
+      { "tier": "AT5", "when_any": ["agent_framework", "self_hosted_inference", "custom_tool_calling"] },
+      { "tier": "AT4", "when_any": ["code_execution_tool", "python_repl_tool", "shell_tool"] },
+      { "tier": "AT3", "when_any": ["lowcode_ai_platform"] },
+      { "tier": "AT2", "when_any": ["platform_integrated_ai"] },
+      { "tier": "AT1", "when_any": ["vendor_embedded_assistant", "model_sdk_only"] },
+      { "tier": "AT0", "when_any": ["no_ai_components"] }
+    ]
+  },
+  "governance_levels": {
+    "L0": "Unaware / Ad Hoc",
+    "L1": "Experimentation without Guardrails",
+    "L2": "Policy-Defined, Human-in-the-Loop",
+    "L3": "Integrated, Continuous Oversight",
+    "L4": "Adaptive, Self-Regulating"
+  },
+  "controls": {
+    "_note": "Detectable controls; each resolves to present | absent | needs-attestation. 'needs-attestation' never counts as present.",
+    "dependency_pinning": "Lockfiles / pinned versions (no floating ^/latest/*).",
+    "secret_management": "Secrets from a vault/env, not hardcoded; not in prompts/logs.",
+    "hitl_gates": "Human approval/confirmation before high-impact/irreversible actions.",
+    "kill_switch": "A documented kill-switch / credential-revocation mechanism.",
+    "rate_cost_caps": "Token/cost/step caps on model calls and agent loops.",
+    "redaction_middleware": "Redaction before external LLM calls / before logs.",
+    "audit_logging": "Tool-call / action audit logging present.",
+    "per_agent_identity": "Per-agent/per-task identity, not one shared static key.",
+    "sbom_aibom": "An SBOM/AIBOM/dependency manifest is present.",
+    "policy_as_code": "Declarative policy/gates (e.g. OPA / config-enforced).",
+    "tenant_isolation": "Per-tenant/per-session isolation on memory/vector stores.",
+    "schema_validation": "Tool/IO schema validation present."
+  },
+  "l_classifier": {
+    "_rule": "L = highest level whose required controls are ALL 'present'. needs-attestation != present.",
+    "levels": [
+      { "level": "L4", "requires_all": ["policy_as_code", "per_agent_identity", "kill_switch", "audit_logging", "redaction_middleware", "tenant_isolation", "sbom_aibom", "rate_cost_caps", "hitl_gates", "secret_management", "dependency_pinning"] },
+      { "level": "L3", "requires_all": ["kill_switch", "audit_logging", "rate_cost_caps", "hitl_gates", "secret_management", "dependency_pinning"] },
+      { "level": "L2", "requires_all": ["hitl_gates", "audit_logging", "secret_management", "dependency_pinning"] },
+      { "level": "L1", "requires_all": ["dependency_pinning", "secret_management"] },
+      { "level": "L0", "requires_all": [] }
+    ]
+  },
+  "matrix": {
+    "_note": "cell label per (AT bucket x L). Buckets: low=AT0-2, mid=AT3-5, high=AT6-7, extreme=AT8.",
+    "low":     { "L0": "Adequate", "L1": "Well-governed", "L2": "Well-governed", "L3": "Well-governed", "L4": "Well-governed" },
+    "mid":     { "L0": "HIGH EXPOSURE", "L1": "Minimum viable", "L2": "Adequate", "L3": "Well-governed", "L4": "Well-governed" },
+    "high":    { "L0": "CRITICAL GAP", "L1": "CRITICAL GAP", "L2": "HIGH EXPOSURE", "L3": "Adequate", "L4": "Well-governed" },
+    "extreme": { "L0": "DO NOT DEPLOY", "L1": "DO NOT DEPLOY", "L2": "INSUFFICIENT", "L3": "HIGH EXPOSURE", "L4": "Adequate" }
+  },
+  "recommendation_rule": "If cell is negative (HIGH EXPOSURE/CRITICAL GAP/INSUFFICIENT/DO NOT DEPLOY): recommend the single lowest-cost missing control that raises L by one band; if AT is extreme and L<L3, also recommend reducing tier (e.g., gate federation, remove unapproved MCP servers)."
+}

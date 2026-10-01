@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "description": "Known-exploit fingerprint DB for AI/agentic/MCP components. Matched by package name (+ optional version predicate) found in dependency manifests or imports. Each entry carries its risk mapping so a match becomes a crosswalk-tagged finding.",
+    "version": "2026.1",
+    "match_fields": ["package", "ecosystem", "affected", "class", "risk", "severity"]
+  },
+  "cves": [
+    {"cve": "CVE-2024-3584", "package": "qdrant", "ecosystem": "pypi", "affected": "<1.9.0", "class": "snapshot path traversal -> arbitrary file write", "risk": {"dsgai": ["DSGAI05", "DSGAI13"], "llm": ["LLM09"]}, "severity": "critical"},
+    {"cve": "CVE-2024-3829", "package": "qdrant", "ecosystem": "pypi", "affected": "<1.9.0", "class": "arbitrary file upload -> RCE (snapshot handling)", "risk": {"dsgai": ["DSGAI05", "DSGAI13"]}, "severity": "critical"},
+    {"cve": "CVE-2024-5184", "package": "emailgpt", "ecosystem": "generic", "affected": "*", "class": "prompt injection -> system-prompt disclosure", "risk": {"llm": ["LLM01", "LLM02"]}, "severity": "high"},
+    {"cve": "CVE-2024-7042", "package": "@langchain/community", "ecosystem": "npm", "affected": "<0.2.19", "class": "GraphCypherQAChain prompt injection -> SQL/Cypher injection", "risk": {"dsgai": ["DSGAI12"], "llm": ["LLM10"]}, "severity": "high"},
+    {"cve": "CVE-2024-8309", "package": "langchain", "ecosystem": "pypi", "affected": "<0.2.19", "class": "GraphCypherQAChain prompt injection -> malicious Cypher (Neo4j)", "risk": {"dsgai": ["DSGAI12"], "llm": ["LLM10"]}, "severity": "high"},
+    {"cve": "CVE-2025-24357", "package": "vllm", "ecosystem": "pypi", "affected": "<0.7.0", "class": "insecure torch.load() on HF Hub checkpoints -> RCE", "risk": {"llm": ["LLM04"], "dsgai": ["DSGAI04"]}, "severity": "high"},
+    {"cve": "CVE-2025-32434", "package": "torch", "ecosystem": "pypi", "affected": "<2.6.0", "class": "torch.load weights_only bypass -> RCE", "risk": {"llm": ["LLM04", "LLM05"]}, "severity": "high"},
+    {"cve": "CVE-2025-6514", "package": "mcp-remote", "ecosystem": "npm", "affected": "<0.1.16", "class": "OS command injection via crafted authorization_endpoint URL", "risk": {"asi": ["ASI04", "ASI05"], "dsgai": ["DSGAI06"]}, "severity": "critical"},
+    {"cve": "CVE-2025-6515", "package": "oatpp-mcp", "ecosystem": "generic", "affected": "*", "class": "session ID = instance pointer (non-unique/insecure)", "risk": {"dsgai": ["DSGAI11", "DSGAI06"], "asi": ["ASI03"]}, "severity": "high"},
+    {"cve": "CVE-2025-64513", "package": "milvus", "ecosystem": "pypi", "affected": "*", "class": "forged sourceID header -> auth bypass", "risk": {"llm": ["LLM09"], "dsgai": ["DSGAI13"]}, "severity": "critical"},
+    {"cve": "CVE-2025-69286", "package": "ragflow", "ecosystem": "pypi", "affected": "*", "class": "predictable token derivation -> account takeover", "risk": {"llm": ["LLM09"], "dsgai": ["DSGAI11", "DSGAI13"]}, "severity": "critical"},
+    {"cve": "CVE-2024-37032", "package": "ollama", "ecosystem": "generic", "affected": "<0.1.34", "class": "path traversal via malicious model manifest -> RCE", "risk": {"llm": ["LLM04"]}, "severity": "critical"},
+    {"cve": "CVE-2024-23496", "package": "llama.cpp", "ecosystem": "generic", "affected": "*", "class": "GGUF parsing heap overflow", "risk": {"llm": ["LLM04"], "dsgai": ["DSGAI04"]}, "severity": "high"},
+    {"cve": "CVE-2023-48022", "package": "ray", "ecosystem": "pypi", "affected": "*", "class": "ShadowRay: unauth dashboard -> RCE/self-propagation", "risk": {"llm": ["LLM04"]}, "severity": "critical"}
+  ],
+  "named_incidents": [
+    {"id": "torchtriton-2022", "package": "torchtriton", "ecosystem": "pypi", "class": "dependency-confusion poisoning", "risk": {"llm": ["LLM04"], "dsgai": ["DSGAI04"]}},
+    {"id": "postmark-mcp", "package": "postmark-mcp", "ecosystem": "npm", "class": "malicious MCP server (secret BCC exfil)", "risk": {"asi": ["ASI04"], "dsgai": ["DSGAI06"]}},
+    {"id": "nullifai", "package": "*", "ecosystem": "huggingface", "class": "compressed-pickle scanner bypass", "risk": {"llm": ["LLM04", "LLM05"]}}
+  ]
+}

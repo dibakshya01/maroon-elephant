@@ -1,0 +1,93 @@
+{
+  "_meta": {
+    "description": "Cross-framework mapping. Each primary control id maps to related ids so every Maroon Elephant finding can carry a full, auditable tuple. Rules reference one or more primary ids and inherit this crosswalk.",
+    "tuple_fields": ["asi", "dsgai", "maestro_layer", "aivss", "nhi", "atlas", "attack", "cwe", "nist_ai_600_1", "aicm", "regulatory"],
+    "version": "2026.1"
+  },
+  "LLM01": {
+    "title": "Prompt Injection",
+    "asi": ["ASI01", "ASI02", "ASI06"], "dsgai": ["DSGAI01", "DSGAI06"], "maestro_layer": 2,
+    "aivss": ["AIVSS-10"], "atlas": ["AML.TA0004", "AML.TA0005", "AML.T0080.000"],
+    "attack": ["TA0001"], "cwe": ["CWE-1427", "CWE-77"], "nist_ai_600_1": ["Information Security"],
+    "aicm": ["AIS", "IAM"], "regulatory": []
+  },
+  "LLM02": {
+    "title": "Sensitive Information Disclosure",
+    "asi": ["ASI03"], "dsgai": ["DSGAI01", "DSGAI14", "DSGAI18"], "maestro_layer": 2,
+    "aivss": [], "nhi": ["NHI2"], "atlas": ["AML.TA0010", "AML.TA0013"], "attack": ["TA0010"],
+    "cwe": ["CWE-200", "CWE-532"], "nist_ai_600_1": ["Data Privacy", "Information Security"],
+    "aicm": ["DSP", "LOG"], "regulatory": ["GDPR-Art5", "GDPR-Art33", "HIPAA"]
+  },
+  "LLM03": {
+    "title": "Excessive Agency",
+    "asi": ["ASI02", "ASI03", "ASI08"], "dsgai": ["DSGAI06"], "maestro_layer": 3,
+    "aivss": ["AIVSS-1", "AIVSS-2", "AIVSS-7"], "atlas": ["AML.TA0005"], "attack": ["TA0002", "TA0004", "TA0040"],
+    "cwe": ["CWE-285", "CWE-732", "CWE-250"], "nist_ai_600_1": ["Human-AI Configuration"],
+    "aicm": ["IAM", "AIS"], "regulatory": ["EU-AI-Act-Art14"]
+  },
+  "LLM04": {
+    "title": "Supply Chain",
+    "asi": ["ASI04"], "dsgai": ["DSGAI04"], "maestro_layer": 3,
+    "aivss": ["AIVSS-8"], "atlas": ["AML.T0010", "AML.TA0004"], "attack": ["TA0001", "TA0042"],
+    "cwe": ["CWE-494", "CWE-829", "CWE-502"], "nist_ai_600_1": ["Value Chain and Component Integration"],
+    "aicm": ["STA", "MDS", "TVM"], "regulatory": []
+  },
+  "LLM05": {
+    "title": "Data and Model Poisoning",
+    "asi": ["ASI04", "ASI06", "ASI08"], "dsgai": ["DSGAI04", "DSGAI21"], "maestro_layer": 2,
+    "aivss": ["AIVSS-6"], "atlas": ["AML.TA0003", "AML.TA0006", "AML.TA0011"], "attack": [],
+    "cwe": ["CWE-349", "CWE-829", "CWE-502"], "nist_ai_600_1": ["Information Integrity"],
+    "aicm": ["MDS", "DSP"], "regulatory": []
+  },
+  "LLM06": {
+    "title": "Unbounded Consumption",
+    "asi": ["ASI02", "ASI08"], "dsgai": ["DSGAI17"], "maestro_layer": 4,
+    "aivss": ["AIVSS-3"], "atlas": ["AML.TA0010"], "attack": ["TA0040"],
+    "cwe": ["CWE-400", "CWE-770", "CWE-691"], "nist_ai_600_1": ["Information Security"],
+    "aicm": ["AIS", "BCR", "IVS"], "regulatory": []
+  },
+  "LLM07": {
+    "title": "Misinformation",
+    "asi": ["ASI08", "ASI09", "ASI10"], "dsgai": ["DSGAI21"], "maestro_layer": 1,
+    "aivss": ["AIVSS-3"], "atlas": ["AML.TA0011"], "attack": [],
+    "cwe": ["CWE-1426", "CWE-349"], "nist_ai_600_1": ["Confabulation", "Information Integrity"],
+    "aicm": ["AIS", "TVM"], "regulatory": []
+  },
+  "LLM08": {
+    "title": "Hidden Context Exposure",
+    "asi": ["ASI06", "ASI07"], "dsgai": ["DSGAI01"], "maestro_layer": 2,
+    "aivss": [], "nhi": ["NHI2"], "atlas": ["AML.TA0008", "AML.TA0013"], "attack": [],
+    "cwe": ["CWE-200", "CWE-798", "CWE-693"], "nist_ai_600_1": ["Information Security"],
+    "aicm": ["AIS", "IAM", "CEK"], "regulatory": []
+  },
+  "LLM09": {
+    "title": "Vector and Embedding Weaknesses",
+    "asi": ["ASI04", "ASI06"], "dsgai": ["DSGAI11", "DSGAI13", "DSGAI18"], "maestro_layer": 2,
+    "aivss": ["AIVSS-6"], "atlas": ["AML.T0070", "AML.TA0010"], "attack": [],
+    "cwe": ["CWE-200", "CWE-285", "CWE-359"], "nist_ai_600_1": ["Data Privacy"],
+    "aicm": ["IAM", "DSP", "CEK"], "regulatory": ["GDPR-Art33"]
+  },
+  "LLM10": {
+    "title": "Improper Output Handling",
+    "asi": ["ASI02", "ASI05", "ASI09"], "dsgai": ["DSGAI12"], "maestro_layer": 3,
+    "aivss": [], "atlas": ["AML.TA0005", "AML.TA0010"], "attack": ["TA0002"],
+    "cwe": ["CWE-1426", "CWE-116", "CWE-79", "CWE-89", "CWE-94"], "nist_ai_600_1": [],
+    "aicm": ["AIS", "LOG"], "regulatory": []
+  },
+
+  "ASI01": {"title": "Agent Goal Hijack", "llm": ["LLM01"], "dsgai": ["DSGAI06"], "maestro_layer": 3, "aivss": ["AIVSS-10"], "attack": ["TA0001"], "cwe": ["CWE-1427"], "agentic_threats": ["T6", "T7"]},
+  "ASI02": {"title": "Tool Misuse and Exploitation", "llm": ["LLM03", "LLM10"], "dsgai": ["DSGAI06"], "maestro_layer": 3, "aivss": ["AIVSS-1"], "cwe": ["CWE-285", "CWE-77"], "agentic_threats": ["T2", "T4", "T16"]},
+  "ASI03": {"title": "Identity and Privilege Abuse", "llm": ["LLM02"], "dsgai": ["DSGAI02"], "maestro_layer": 6, "aivss": ["AIVSS-2"], "nhi": ["NHI5", "NHI7", "NHI9"], "cwe": ["CWE-285", "CWE-269"], "agentic_threats": ["T3"]},
+  "ASI04": {"title": "Agentic Supply Chain Vulnerabilities", "llm": ["LLM04"], "dsgai": ["DSGAI04", "DSGAI06"], "maestro_layer": 7, "aivss": ["AIVSS-8"], "nhi": ["NHI3"], "atlas": ["AML.T0010"], "cwe": ["CWE-829", "CWE-494"], "agentic_threats": ["T17"]},
+  "ASI05": {"title": "Unexpected Code Execution (RCE)", "llm": ["LLM05", "LLM10"], "maestro_layer": 4, "aivss": ["AIVSS-7"], "cwe": ["CWE-94", "CWE-502", "CWE-77"], "agentic_threats": ["T11"]},
+  "ASI06": {"title": "Memory and Context Poisoning", "llm": ["LLM01", "LLM05", "LLM09"], "dsgai": ["DSGAI11", "DSGAI13"], "maestro_layer": 2, "aivss": ["AIVSS-6"], "atlas": ["AML.T0070", "AML.T0080.000"], "cwe": ["CWE-349"], "agentic_threats": ["T1", "T12"]},
+  "ASI07": {"title": "Insecure Inter-Agent Communication", "llm": ["LLM02"], "maestro_layer": 7, "aivss": ["AIVSS-4"], "cwe": ["CWE-319", "CWE-345"], "agentic_threats": ["T12", "T16"]},
+  "ASI08": {"title": "Cascading Failures", "llm": ["LLM06"], "maestro_layer": 4, "aivss": ["AIVSS-3"], "cwe": ["CWE-691"], "agentic_threats": ["T5", "T8"]},
+  "ASI09": {"title": "Human-Agent Trust Exploitation", "llm": ["LLM07"], "maestro_layer": 6, "aivss": [], "cwe": ["CWE-451"], "agentic_threats": ["T7", "T10", "T15"]},
+  "ASI10": {"title": "Rogue Agents", "llm": ["LLM07"], "maestro_layer": 6, "aivss": [], "cwe": ["CWE-693"], "agentic_threats": ["T13", "T14"]},
+
+  "DSGAI12": {"title": "Unsafe NL Data Gateways", "llm": ["LLM10"], "asi": ["ASI05"], "maestro_layer": 2, "cwe": ["CWE-89", "CWE-943"], "regulatory": ["GDPR-Art5"]},
+  "DSGAI13": {"title": "Vector Store Platform Data Security", "llm": ["LLM09"], "asi": ["ASI06"], "maestro_layer": 2, "cwe": ["CWE-200", "CWE-285", "CWE-22"], "regulatory": ["GDPR-Art33"]},
+  "DSGAI04": {"title": "Data, Model & Artifact Poisoning", "llm": ["LLM04", "LLM05"], "asi": ["ASI04"], "maestro_layer": 2, "atlas": ["AML.T0010"], "cwe": ["CWE-502", "CWE-494"], "regulatory": []},
+  "DSGAI02": {"title": "Agent Identity & Credential Exposure", "llm": ["LLM02"], "asi": ["ASI03"], "maestro_layer": 6, "nhi": ["NHI2", "NHI7"], "cwe": ["CWE-798", "CWE-522"], "regulatory": []}
+}

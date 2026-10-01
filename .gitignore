@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.coverage
+
+# Maroon Elephant local state
+.maroon/
+*.sarif.local
+scan-output/
+*.me-cache
+
+# Secrets / BYOK — never commit
+.env
+.env.*
+*.key
+*.pem
+byok.local.json
+
+# Launch copy (handoff only, never public)
+LAUNCH.md
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Node (VS Code extension / tooling)
+node_modules/
+*.vsix

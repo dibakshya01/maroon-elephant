@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "description": "Maps Grey Panda control identifiers to Maroon Elephant canonical ids (crosswalk keys). Grey Panda already cites OWASP ids (e.g. 'LLM01:2026'), so mapping is mostly normalization; on disagreement keep the union and tag each id with its source.",
+    "version": "2026.1",
+    "grey_panda_version_floor": "1.0.6",
+    "grey_panda_tested": "1.0.7",
+    "mcp_protocol": "2025-06-18"
+  },
+  "owasp_id_normalization": {
+    "_rule": "Strip ':2026'/':2025' year suffix and whitespace; uppercase. 'LLM01:2026' -> 'LLM01'. 'ASI02' -> 'ASI02'.",
+    "suffixes_to_strip": [":2026", ":2025", ":2024"]
+  },
+  "rule_prefix_category": {
+    "GP-AI-": "llm",
+    "GP-MCP-": "mcp",
+    "GP-AGT-": "asi",
+    "GP-DATA-": "dsgai",
+    "C": "aisvs",
+    "ACS-": "aisvs"
+  },
+  "consumed_finding_schema": {
+    "_note": "Shape of each object in greypanda_scan_path(format=json).findings[]; adapter maps these fields into ME's finding model.",
+    "rule_id": "string",
+    "owasp_id": "string (e.g. 'LLM01:2026'); normalized via owasp_id_normalization",
+    "severity": "CRITICAL|HIGH|MEDIUM|LOW -> me: critical|high|medium|low",
+    "title": "string",
+    "description": "string",
+    "remediation": "string",
+    "file": "string (path)",
+    "line": "int",
+    "snippet": "string (used with file to recompute ME fingerprint)",
+    "sdk": "string|null"
+  },
+  "severity_map": { "CRITICAL": "critical", "HIGH": "high", "MEDIUM": "medium", "LOW": "low" }
+}

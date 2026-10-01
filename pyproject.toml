@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maroon-elephant"
+version = "0.1.0"
+description = "AI-era threat modeling & repo scanning — OWASP-2026 aligned (LLM / Agentic / Data Security / MCP). Deterministic-first, zero-dependency core."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Maroon Elephant contributors" }]
+keywords = [
+    "security", "threat-modeling", "owasp", "llm", "agentic", "mcp",
+    "ai-security", "sast", "sarif", "aibom", "devsecops",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+# CORE HAS ZERO RUNTIME DEPENDENCIES (standard library only). This is deliberate.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/dibakshya01/maroon-elephant"
+Repository = "https://github.com/dibakshya01/maroon-elephant"
+Documentation = "https://dibakshya01.github.io/maroon-elephant/"
+Issues = "https://github.com/dibakshya01/maroon-elephant/issues"
+
+[project.optional-dependencies]
+polyglot = ["tree-sitter>=0.21", "tree-sitter-languages>=1.10"]
+llm = []                       # provider calls use stdlib urllib; key libs optional per provider
+github = ["PyJWT>=2.8", "cryptography>=42"]
+pdf = ["weasyprint>=60"]
+yaml = ["PyYAML>=6"]            # optional authoring convenience; core reads JSON
+dev = ["pytest>=7", "ruff>=0.4", "build>=1.0", "grey-panda>=1.0.6"]
+all = [
+    "tree-sitter>=0.21", "tree-sitter-languages>=1.10",
+    "PyJWT>=2.8", "cryptography>=42", "weasyprint>=60", "PyYAML>=6",
+]
+
+[project.scripts]
+maroon = "maroon.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["maroon*"]
+
+# The knowledge pack (JSON) and UI assets ship INSIDE the package so they are
+# importable at runtime via importlib.resources regardless of install location.
+[tool.setuptools.package-data]
+maroon = ["py.typed", "knowledge/**/*.json", "ui/static/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100

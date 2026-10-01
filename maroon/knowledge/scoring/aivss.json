@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "description": "Deterministic severity model anchored on OWASP AIVSS v0.8. Severity is computed from code-derivable factors PLUS documented defaults for agentic/AARS factors that are not derivable from static code. The score is deterministic given these defaults; reports state which factors were derived vs defaulted.",
+    "version": "0.8-me1",
+    "scale": ["info", "low", "medium", "high", "critical"]
+  },
+  "code_derived_factors": {
+    "sink_reachability": {
+      "description": "Does untrusted/model-controlled data reach a dangerous sink (exec/eval/shell/SQL/deserialize/render)?",
+      "weights": { "direct": 1.0, "indirect": 0.6, "none": 0.0 }
+    },
+    "privilege": {
+      "description": "Privilege of the affected identity/credential.",
+      "weights": { "admin_or_wildcard": 1.0, "write": 0.7, "read": 0.3, "scoped": 0.1 }
+    },
+    "external_comms": {
+      "description": "Can the component send data to an external destination?",
+      "weights": { "yes": 1.0, "internal_only": 0.4, "no": 0.0 }
+    },
+    "data_sensitivity": {
+      "description": "Sensitivity of data reachable by the component.",
+      "weights": { "secrets_or_regulated": 1.0, "internal": 0.6, "public": 0.1 }
+    },
+    "exposure": {
+      "description": "Is the entrypoint internet-facing / unauthenticated?",
+      "weights": { "public_unauth": 1.0, "public_auth": 0.6, "internal": 0.3, "local": 0.1 }
+    }
+  },
+  "defaulted_aars_factors": {
+    "_note": "Not statically derivable. Pinned defaults make scoring deterministic; reports flag these as 'defaulted'.",
+    "autonomy_level": { "default": "semi_autonomous", "weights": { "supervised": 0.3, "semi_autonomous": 0.6, "fully_autonomous": 1.0 } },
+    "human_oversight": { "default": "unknown_assume_absent", "weights": { "present": 0.2, "unknown_assume_absent": 0.8, "absent": 1.0 } },
+    "blast_radius": { "default": "service", "weights": { "single": 0.3, "service": 0.6, "cross_tenant_or_org": 1.0 } }
+  },
+  "severity_bands": {
+    "_note": "Final numeric score in [0,10] = base_weight(rule) * (0.4*max(code_factors) + 0.3*mean(code_factors) + 0.3*aars_component). Bands map score -> label.",
+    "critical": [9.0, 10.0],
+    "high": [7.0, 8.99],
+    "medium": [4.0, 6.99],
+    "low": [1.0, 3.99],
+    "info": [0.0, 0.99]
+  },
+  "rule_base_weights": {
+    "_note": "Per-rule starting weight by the primary OWASP risk class; a rule may override.",
+    "LLM01": 8.0, "LLM02": 8.5, "LLM03": 8.0, "LLM04": 7.5, "LLM05": 7.5,
+    "LLM06": 6.0, "LLM07": 6.0, "LLM08": 7.0, "LLM09": 7.5, "LLM10": 7.5,
+    "ASI01": 8.0, "ASI02": 8.0, "ASI03": 8.5, "ASI04": 7.5, "ASI05": 9.0,
+    "ASI06": 7.5, "ASI07": 7.0, "ASI08": 7.0, "ASI09": 6.5, "ASI10": 8.0,
+    "DSGAI": 7.0
+  },
+  "aivss_core_risk_default_map": {
+    "LLM01": "AIVSS-10", "LLM03": "AIVSS-1", "LLM06": "AIVSS-3", "LLM09": "AIVSS-6",
+    "ASI02": "AIVSS-1", "ASI03": "AIVSS-2", "ASI04": "AIVSS-8", "ASI05": "AIVSS-7",
+    "ASI06": "AIVSS-6", "ASI07": "AIVSS-4", "ASI08": "AIVSS-3", "ASI01": "AIVSS-10"
+  }
+}

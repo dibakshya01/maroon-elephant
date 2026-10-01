@@ -1,0 +1,30 @@
+Maroon Elephant
+Copyright 2026 Maroon Elephant contributors
+
+This product includes software developed by the Maroon Elephant contributors,
+licensed under the Apache License, Version 2.0.
+
+---
+Standards & reference attribution
+---
+
+Maroon Elephant's knowledge pack (maroon/knowledge/) encodes threat taxonomies,
+control identifiers, and cross-framework mappings derived from the following
+works. Identifiers and summaries are used for interoperability; no source text is
+reproduced verbatim. These works are the property of their respective authors.
+
+- OWASP GenAI Security Project — "OWASP Top 10 for LLM Applications 2026",
+  "OWASP Top 10 for Agentic Applications 2026", "State of Agentic AI Security and
+  Governance v2", "OWASP GenAI Data Security Risks and Mitigations 2026", and the
+  OWASP MCP security guides. Licensed CC BY-SA 4.0. OWASP® is a registered
+  trademark of the OWASP Foundation, Inc.
+- Cloud Security Alliance — MAESTRO agentic threat-modeling framework.
+- MITRE ATLAS™ and MITRE ATT&CK® — © The MITRE Corporation.
+- NIST AI Risk Management Framework and AI 600-1 Generative AI Profile.
+- OWASP AIVSS (AI Vulnerability Scoring System) v0.8.
+
+Optional, pluggable integration (not bundled):
+- grey-panda (https://github.com/dibakshya01/grey-panda), Apache-2.0, invoked as an
+  optional deterministic sub-scanner when present. Not a dependency of the core.
+
+Use of these names does not imply endorsement by the respective organizations.

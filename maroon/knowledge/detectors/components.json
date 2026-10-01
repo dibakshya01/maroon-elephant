@@ -1,0 +1,53 @@
+{
+  "_meta": {
+    "description": "Component fingerprint library. Each entry maps detectable signals (python imports, dependency package names, config files/keys) to a category, MAESTRO layer, default trust tier, and the AT-classifier signals it emits. Drives the AI-BOM and the AT x L tier classifier. Deterministic and table-driven.",
+    "version": "2026.1",
+    "trust_tiers": ["untrusted", "external", "orchestration", "internal", "foundation"]
+  },
+  "components": {
+    "langchain": {"category": "agent_framework", "imports": ["langchain", "langchain_core", "langchain_community"], "packages": ["langchain", "langchain-core", "langchain-community"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "custom_tool_calling"]},
+    "langgraph": {"category": "agent_framework", "imports": ["langgraph"], "packages": ["langgraph"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "langgraph_multi_node", "multi_agent_orchestration"]},
+    "crewai": {"category": "agent_framework", "imports": ["crewai"], "packages": ["crewai"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "crewai_crew", "multi_agent_orchestration"]},
+    "autogen": {"category": "agent_framework", "imports": ["autogen", "pyautogen", "ag2", "autogen_agentchat"], "packages": ["pyautogen", "autogen-agentchat", "ag2"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "autogen_groupchat", "multi_agent_orchestration"]},
+    "llama_index": {"category": "agent_framework", "imports": ["llama_index"], "packages": ["llama-index"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "custom_tool_calling"]},
+    "semantic_kernel": {"category": "agent_framework", "imports": ["semantic_kernel"], "packages": ["semantic-kernel"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "custom_tool_calling"]},
+    "openai_agents": {"category": "agent_framework", "imports": ["agents"], "packages": ["openai-agents"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "custom_tool_calling"]},
+    "claude_agent_sdk": {"category": "agent_framework", "imports": ["claude_agent_sdk"], "packages": ["claude-agent-sdk"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "custom_tool_calling"]},
+    "autogpt": {"category": "agent_framework", "imports": ["autogpt"], "packages": ["autogpt"], "maestro_layer": 3, "trust_tier": "orchestration", "at_signals": ["agent_framework", "agent_spawning"]},
+    "open_interpreter": {"category": "code_exec_agent", "imports": ["interpreter"], "packages": ["open-interpreter"], "maestro_layer": 4, "trust_tier": "orchestration", "at_signals": ["code_execution_tool"]},
+
+    "litellm": {"category": "model_gateway", "imports": ["litellm"], "packages": ["litellm"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["model_sdk_only"]},
+    "openai_sdk": {"category": "model_sdk", "imports": ["openai"], "packages": ["openai"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["model_sdk_only"]},
+    "anthropic_sdk": {"category": "model_sdk", "imports": ["anthropic"], "packages": ["anthropic"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["model_sdk_only"]},
+    "google_genai": {"category": "model_sdk", "imports": ["google.generativeai", "google.genai"], "packages": ["google-generativeai", "google-genai"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["model_sdk_only"]},
+    "cohere_sdk": {"category": "model_sdk", "imports": ["cohere"], "packages": ["cohere"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["model_sdk_only"]},
+    "mistral_sdk": {"category": "model_sdk", "imports": ["mistralai"], "packages": ["mistralai"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["model_sdk_only"]},
+    "ollama": {"category": "model_runtime", "imports": ["ollama"], "packages": ["ollama"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["self_hosted_inference"]},
+    "transformers": {"category": "model_runtime", "imports": ["transformers"], "packages": ["transformers"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": ["self_hosted_inference"]},
+    "vllm": {"category": "model_serving", "imports": ["vllm"], "packages": ["vllm"], "maestro_layer": 4, "trust_tier": "foundation", "at_signals": ["self_hosted_inference"]},
+
+    "mcp_sdk": {"category": "mcp", "imports": ["mcp", "mcp.server", "mcp.server.fastmcp"], "packages": ["mcp"], "maestro_layer": 7, "trust_tier": "external", "at_signals": ["mcp_server"]},
+    "mcp_sdk_ts": {"category": "mcp", "imports": ["@modelcontextprotocol/sdk"], "packages": ["@modelcontextprotocol/sdk"], "maestro_layer": 7, "trust_tier": "external", "at_signals": ["mcp_server"]},
+    "mcp_client_config": {"category": "mcp_config", "config_files": ["mcp.json", ".mcp.json", ".cursor/mcp.json", "claude_desktop_config.json", ".vscode/mcp.json"], "config_keys": ["mcpServers", "servers"], "maestro_layer": 7, "trust_tier": "external", "at_signals": ["mcp_client_config", "third_party_tool_registry"]},
+    "agent_card": {"category": "a2a", "config_files": [".well-known/agent.json"], "maestro_layer": 7, "trust_tier": "external", "at_signals": ["a2a_cross_org"]},
+
+    "pinecone": {"category": "vector_db", "imports": ["pinecone"], "packages": ["pinecone", "pinecone-client"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "chromadb": {"category": "vector_db", "imports": ["chromadb"], "packages": ["chromadb"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "weaviate": {"category": "vector_db", "imports": ["weaviate"], "packages": ["weaviate-client"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "qdrant": {"category": "vector_db", "imports": ["qdrant_client"], "packages": ["qdrant-client"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "milvus": {"category": "vector_db", "imports": ["pymilvus"], "packages": ["pymilvus"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "pgvector": {"category": "vector_db", "imports": ["pgvector"], "packages": ["pgvector"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "faiss": {"category": "vector_db", "imports": ["faiss"], "packages": ["faiss-cpu", "faiss-gpu"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+    "lancedb": {"category": "vector_db", "imports": ["lancedb"], "packages": ["lancedb"], "maestro_layer": 2, "trust_tier": "internal", "at_signals": []},
+
+    "peft": {"category": "finetune", "imports": ["peft"], "packages": ["peft"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": []},
+    "trl": {"category": "finetune", "imports": ["trl"], "packages": ["trl"], "maestro_layer": 1, "trust_tier": "foundation", "at_signals": []},
+
+    "langsmith": {"category": "observability", "imports": ["langsmith"], "packages": ["langsmith"], "env_keys": ["LANGCHAIN_TRACING_V2", "LANGSMITH_API_KEY"], "maestro_layer": 5, "trust_tier": "internal", "at_signals": []},
+    "langfuse": {"category": "observability", "imports": ["langfuse"], "packages": ["langfuse"], "maestro_layer": 5, "trust_tier": "internal", "at_signals": []},
+    "helicone": {"category": "observability", "imports": ["helicone"], "packages": ["helicone"], "maestro_layer": 5, "trust_tier": "internal", "at_signals": []},
+    "openllmetry": {"category": "observability", "imports": ["traceloop"], "packages": ["traceloop-sdk"], "maestro_layer": 5, "trust_tier": "internal", "at_signals": []},
+
+    "lowcode_ai": {"category": "lowcode", "config_globs": ["*.copilotstudio", "*agentforce*"], "maestro_layer": 3, "trust_tier": "external", "at_signals": ["lowcode_ai_platform"]}
+  }
+}

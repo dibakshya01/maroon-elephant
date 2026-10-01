@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "description": "Per-provider price table (USD per 1M tokens) for orchestrator cost accounting. Approximate list prices; used only to enforce the per-run cost ceiling, not for billing. Local providers are $0.",
+    "version": "2026.1",
+    "unit": "usd_per_million_tokens"
+  },
+  "providers": {
+    "anthropic": { "input": 3.0, "output": 15.0, "_note": "mid-tier default; overridable per model" },
+    "openai": { "input": 2.5, "output": 10.0 },
+    "google": { "input": 1.25, "output": 5.0 },
+    "azure_openai": { "input": 2.5, "output": 10.0 },
+    "ollama": { "input": 0.0, "output": 0.0, "_note": "local, air-gapped" },
+    "lmstudio": { "input": 0.0, "output": 0.0, "_note": "local, air-gapped" },
+    "_default": { "input": 3.0, "output": 15.0, "_note": "used when provider/model unknown; conservative" }
+  }
+}
