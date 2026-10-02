@@ -31,6 +31,10 @@ SPECIAL_NAMES = {
     "build.gradle", "Cargo.toml",
 }
 MAX_FILE_BYTES = 2_000_000
+MAX_LINE_CHARS = 20_000           # truncate pathologically long lines (ReDoS / DoS defense)
+MAX_ZIP_TOTAL_BYTES = 500_000_000  # 500 MB uncompressed cap (zip-bomb defense)
+MAX_ZIP_MEMBERS = 50_000
+MAX_ZIP_RATIO = 200               # per-member compression-ratio cap
 
 
 @dataclass
@@ -47,9 +51,11 @@ class Target:
     def read_lines(self, rel: str) -> List[str]:
         try:
             with open(self.abspath(rel), "r", encoding="utf-8", errors="replace") as fh:
-                return fh.read().splitlines()
+                lines = fh.read().splitlines()
         except (OSError, ValueError):
             return []
+        # Truncate pathologically long lines so a crafted huge single line can't stall regexes.
+        return [ln if len(ln) <= MAX_LINE_CHARS else ln[:MAX_LINE_CHARS] for ln in lines]
 
     def cleanup(self) -> None:
         if self._tmp and os.path.isdir(self._tmp):
@@ -115,14 +121,42 @@ def from_path(path: str) -> Target:
     return Target(root=root, files=_walk(root), origin="local", name=os.path.basename(root.rstrip("/")))
 
 
+_ALLOWED_GIT_SCHEMES = ("http://", "https://", "git://", "ssh://")
+# Cloud-metadata / link-local hosts we refuse to clone from (SSRF defense).
+_BLOCKED_HOSTS = {"169.254.169.254", "metadata.google.internal", "metadata",
+                  "100.100.100.200", "fd00:ec2::254"}
+
+
+def _validate_git_url(url: str) -> None:
+    if url.startswith("-"):
+        raise ValueError("Refusing git URL that looks like a CLI option: %r" % url)
+    low = url.lower()
+    is_scp = "@" in url and ":" in url.split("@", 1)[1] and "://" not in url  # git@host:path
+    if not (low.startswith(_ALLOWED_GIT_SCHEMES) or is_scp):
+        raise ValueError("Unsupported git URL scheme (allowed: http/https/git/ssh): %r" % url)
+    host = ""
+    if "://" in url:
+        host = url.split("://", 1)[1].split("/", 1)[0].split("@")[-1].split(":")[0].lower()
+    elif is_scp:
+        host = url.split("@", 1)[1].split(":", 1)[0].lower()
+    if host in _BLOCKED_HOSTS or host.startswith("169.254."):
+        raise ValueError("Refusing to clone from a cloud-metadata/link-local host: %r" % host)
+
+
 def from_git(url: str, ref: Optional[str] = None) -> Target:
+    _validate_git_url(url)
+    if ref and ref.startswith("-"):
+        raise ValueError("Refusing git ref that looks like a CLI option: %r" % ref)
     tmp = tempfile.mkdtemp(prefix="maroon-clone-")
-    cmd = ["git", "clone", "--depth", "1", "--filter=blob:none", "--quiet"]
+    # Harden transport: disable ext:: (command exec) and file:: regardless of git version.
+    cmd = ["git", "-c", "protocol.ext.allow=never", "-c", "protocol.file.allow=user",
+           "clone", "--depth", "1", "--filter=blob:none", "--quiet"]
     if ref:
         cmd += ["--branch", ref]
-    cmd += [url, tmp]
+    cmd += ["--", url, tmp]   # '--' stops any remaining arg-injection via url/ref
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_ASKPASS="true", GCM_INTERACTIVE="never")
     try:
-        subprocess.run(cmd, check=True, timeout=300,
+        subprocess.run(cmd, check=True, timeout=300, env=env,
                        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
         import shutil
@@ -145,7 +179,11 @@ def from_zip(zip_path: str) -> Target:
     tmp = tempfile.mkdtemp(prefix="maroon-zip-")
     try:
         with zipfile.ZipFile(zip_path) as zf:
-            for info in zf.infolist():
+            total_uncompressed = 0
+            members = zf.infolist()
+            if len(members) > MAX_ZIP_MEMBERS:
+                raise ValueError("Zip has too many members (%d > %d)" % (len(members), MAX_ZIP_MEMBERS))
+            for info in members:
                 # reject absolute paths, traversal, and symlinks
                 name = info.filename
                 if name.startswith("/") or ".." in name.replace("\\", "/").split("/"):
@@ -156,7 +194,13 @@ def from_zip(zip_path: str) -> Target:
                 dest = os.path.join(tmp, name)
                 if not _is_within(tmp, dest):
                     raise ValueError("Zip member escapes extraction dir: %s" % name)
-            zf.extractall(tmp)  # maroon: ignore[ME-DSGAI05-archive-extract] members validated above (no traversal/symlinks)
+                # zip-bomb defense: cap total uncompressed size and per-member ratio
+                total_uncompressed += info.file_size
+                if total_uncompressed > MAX_ZIP_TOTAL_BYTES:
+                    raise ValueError("Zip uncompressed size exceeds %d bytes (zip bomb?)" % MAX_ZIP_TOTAL_BYTES)
+                if info.compress_size > 0 and info.file_size / info.compress_size > MAX_ZIP_RATIO:
+                    raise ValueError("Zip member compression ratio too high (zip bomb?): %s" % name)
+            zf.extractall(tmp)  # maroon: ignore[ME-DSGAI05-archive-extract] members validated above (no traversal/symlinks, size-capped)
     except Exception:
         import shutil
         shutil.rmtree(tmp, ignore_errors=True)

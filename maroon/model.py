@@ -63,16 +63,22 @@ def evidence_digest_from_token(token: str) -> str:
     return _sha256_hex(normalize_text(token))
 
 
-def correlation_key(primary: str, norm_path: str, evidence_digest: str) -> str:
+def correlation_key(primary: str, norm_path: str, evidence_digest: str, occurrence: int = 0) -> str:
     """Cross-source merge key: rule_id-free (so ME-native and grey-panda findings of the
     SAME issue class on the same span merge) but keyed on the primary OWASP id (so two
-    DIFFERENT issue classes on the same line stay distinct). First 32 hex chars (128-bit)."""
-    return _sha256_hex((primary or "") + "\x00" + norm_path + "\x00" + evidence_digest)[:32]
+    DIFFERENT issue classes on the same line stay distinct) AND on the occurrence index (so
+    two IDENTICAL code blocks at different lines stay distinct — they are different findings,
+    not one). First 32 hex chars (128-bit)."""
+    return _sha256_hex((primary or "") + "\x00" + norm_path + "\x00" + evidence_digest
+                       + "\x00#" + str(occurrence))[:32]
 
 
-def fingerprint(canonical_rule_id: str, norm_path: str, evidence_digest: str) -> str:
-    """Per-alert identity for SARIF partialFingerprints + baseline (first 32 hex chars)."""
-    return _sha256_hex(canonical_rule_id + "\x00" + norm_path + "\x00" + evidence_digest)[:32]
+def fingerprint(canonical_rule_id: str, norm_path: str, evidence_digest: str, occurrence: int = 0) -> str:
+    """Per-alert identity for SARIF partialFingerprints + baseline (first 32 hex chars).
+    Includes the occurrence index so a newly-added duplicate of an existing finding gets a
+    DISTINCT fingerprint and is NOT suppressed by --baseline."""
+    return _sha256_hex(canonical_rule_id + "\x00" + norm_path + "\x00" + evidence_digest
+                       + "\x00#" + str(occurrence))[:32]
 
 
 # --------------------------------------------------------------------------- #
@@ -112,6 +118,8 @@ class Finding:
     severity_score: Optional[float] = None
     derived_factors: Dict[str, Any] = field(default_factory=dict)
     maestro_layer: Optional[int] = None
+    occurrence: int = 0   # index among identical findings at distinct lines (set by assign_occurrences)
+    explanation: Optional[str] = None   # optional, evidence-gated LLM enrichment (never a source of findings)
 
     def __post_init__(self) -> None:
         self.file = normalize_path(self.file)
@@ -131,11 +139,11 @@ class Finding:
 
     @property
     def correlation_key(self) -> str:
-        return correlation_key(self.primary, self.file, self.evidence_digest)
+        return correlation_key(self.primary, self.file, self.evidence_digest, self.occurrence)
 
     @property
     def fingerprint(self) -> str:
-        return fingerprint(self.rule_id, self.file, self.evidence_digest)
+        return fingerprint(self.rule_id, self.file, self.evidence_digest, self.occurrence)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -156,6 +164,7 @@ class Finding:
             "sources": [s.to_dict() for s in self.sources],
             "derived_factors": self.derived_factors,
             "maestro_layer": self.maestro_layer,
+            "explanation": self.explanation,
         }
 
 
@@ -173,6 +182,23 @@ def _union_frameworks(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
         else:
             out[key] = va if va is not None else vb
     return out
+
+
+def assign_occurrences(findings: List[Finding]) -> None:
+    """Disambiguate identical findings at different lines. Group by (primary, file,
+    evidence_digest); within each group, rank by DISTINCT line number. Each finding's
+    `occurrence` = the rank of its line. Same-line findings (e.g. ME + grey-panda) share an
+    occurrence so they still merge; identical blocks at different lines get distinct
+    occurrences so neither is lost to merge or hidden by --baseline. Line-number-independent:
+    a lone finding is always occurrence 0 regardless of where it sits."""
+    groups: Dict[tuple, List[Finding]] = {}
+    for f in findings:
+        groups.setdefault((f.primary, f.file, f.evidence_digest), []).append(f)
+    for group in groups.values():
+        distinct_lines = sorted({f.line for f in group if f.line is not None})
+        line_rank = {ln: i for i, ln in enumerate(distinct_lines)}
+        for f in group:
+            f.occurrence = line_rank.get(f.line, 0) if f.line is not None else 0
 
 
 def merge_findings(findings: List[Finding]) -> List[Finding]:

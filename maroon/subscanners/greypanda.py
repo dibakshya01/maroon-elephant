@@ -50,13 +50,19 @@ def _normalize_owasp(owasp_id: Optional[str]) -> Optional[str]:
     return val.strip()
 
 
-def _rel(target: Target, path: str) -> str:
+def _rel(target: Target, path: str):
+    """Repo-relative POSIX path, or None if it escapes the scan root (don't read outside)."""
     if os.path.isabs(path):
         try:
-            return os.path.relpath(path, target.root).replace(os.sep, "/")
+            rel = os.path.relpath(path, target.root)
         except ValueError:
-            return os.path.basename(path)
-    return path.replace(os.sep, "/")
+            return None
+    else:
+        rel = path
+    rel = rel.replace(os.sep, "/")
+    if rel.startswith("../") or rel == ".." or os.path.isabs(rel):
+        return None
+    return rel
 
 
 def run(target: Target) -> Optional[List[model.Finding]]:
@@ -76,10 +82,14 @@ def run(target: Target) -> Optional[List[model.Finding]]:
         return None
 
     sev_map = kb.greypanda_vocab().get("severity_map", {})
+    from ..ingest import _ignored, _load_ignore
+    ignore = _load_ignore(target.root)
     out: List[model.Finding] = []
     for item in doc.get("findings", []):
         try:
             rel = _rel(target, item.get("file", ""))
+            if rel is None or (ignore and _ignored(rel, ignore)):
+                continue   # outside the scan root, or excluded by .maroonignore (parity with native)
             line = item.get("line")
             lines = target.read_lines(rel)
             if line and int(line) >= 1:

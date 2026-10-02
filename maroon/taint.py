@@ -62,14 +62,16 @@ def _names_used(node: ast.AST) -> Set[str]:
     return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
 
 
+def _target_names(target: ast.AST) -> List[str]:
+    return [n.id for n in ast.walk(target) if isinstance(n, ast.Name)]
+
+
 def _assign_targets(node: ast.AST) -> List[str]:
     out: List[str] = []
     targets = node.targets if isinstance(node, ast.Assign) else (
         [node.target] if isinstance(node, (ast.AnnAssign, ast.AugAssign)) else [])
     for t in targets:
-        for n in ast.walk(t):
-            if isinstance(n, ast.Name):
-                out.append(n.id)
+        out.extend(_target_names(t))
     return out
 
 
@@ -88,52 +90,68 @@ def _sink_of(call: ast.Call) -> Optional[str]:
     return None
 
 
-def _iter_scope_stmts(body: List[ast.stmt]):
-    """Yield statements in a function/module body, descending into control flow but NOT
-    into nested function/class/lambda definitions (those are separate scopes)."""
-    stack = list(body)
+def _scope_nodes(body: List[ast.stmt]) -> List[ast.AST]:
+    """All AST nodes reachable from these statements WITHOUT crossing into a nested
+    function/lambda/class (those are separate scopes). Includes expressions, so taint flows
+    through comprehensions."""
+    out: List[ast.AST] = []
+    stack: List[ast.AST] = list(body)
     while stack:
-        node = stack.pop(0)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
-            continue
-        yield node
+        node = stack.pop()
+        out.append(node)
         for child in ast.iter_child_nodes(node):
-            if isinstance(child, ast.stmt):
-                stack.append(child)
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)):
+                continue
+            stack.append(child)
+    return out
+
+
+def _tainted_rhs(expr, tainted) -> bool:
+    return expr is not None and (_subtree_has_model_call(expr) or bool(_names_used(expr) & set(tainted)))
 
 
 def _analyze_scope(body: List[ast.stmt]) -> List[Tuple[int, str]]:
-    stmts = list(_iter_scope_stmts(body))
-    # Fixpoint taint: a name is tainted if assigned from a model call or from a tainted name.
+    nodes = _scope_nodes(body)
+    # Fixpoint taint: a name is tainted if bound from a model call or a tainted value — via
+    # assignment, for-target, with-as, or comprehension-target.
     tainted: Dict[str, int] = {}
     changed = True
     while changed:
         changed = False
-        for node in stmts:
+        for node in nodes:
+            new_targets: List[str] = []
             if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
-                value = node.value
-                if value is None:
-                    continue
-                rhs_tainted = _subtree_has_model_call(value) or bool(_names_used(value) & set(tainted))
-                if rhs_tainted:
-                    for name in _assign_targets(node):
-                        if name not in tainted:
-                            tainted[name] = getattr(node, "lineno", 0)
-                            changed = True
+                if _tainted_rhs(node.value, tainted):
+                    new_targets = _assign_targets(node)
+            elif isinstance(node, (ast.For, ast.AsyncFor)):
+                if _tainted_rhs(node.iter, tainted):
+                    new_targets = _target_names(node.target)
+            elif isinstance(node, (ast.With, ast.AsyncWith)):
+                for item in node.items:
+                    if item.optional_vars is not None and _tainted_rhs(item.context_expr, tainted):
+                        new_targets += _target_names(item.optional_vars)
+            elif isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                for gen in node.generators:
+                    if _tainted_rhs(gen.iter, tainted):
+                        new_targets += _target_names(gen.target)
+            for name in new_targets:
+                if name not in tainted:
+                    tainted[name] = getattr(node, "lineno", 0)
+                    changed = True
     if not tainted:
         return []
     hits: List[Tuple[int, str]] = []
-    for node in stmts:
-        for call in (n for n in ast.walk(node) if isinstance(n, ast.Call)):
-            sink = _sink_of(call)
-            if not sink:
-                continue
-            used = _names_used(call)
-            tainted_used = used & set(tainted)
-            if tainted_used and getattr(call, "lineno", 10 ** 9) >= min(tainted[n] for n in tainted_used):
-                hits.append((getattr(call, "lineno", 1),
-                             "Untrusted model output reaches %s. Validate/encode in trusted "
-                             "code before this sink (LLM10/ASI05)." % sink))
+    for node in nodes:
+        if not isinstance(node, ast.Call):
+            continue
+        sink = _sink_of(node)
+        if not sink:
+            continue
+        tainted_used = _names_used(node) & set(tainted)
+        if tainted_used and getattr(node, "lineno", 10 ** 9) >= min(tainted[n] for n in tainted_used):
+            hits.append((getattr(node, "lineno", 1),
+                         "Untrusted model output reaches %s. Validate/encode in trusted "
+                         "code before this sink (LLM10/ASI05)." % sink))
     return hits
 
 

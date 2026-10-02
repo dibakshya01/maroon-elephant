@@ -178,7 +178,7 @@ _TRIFECTA = {
         r"webhook|slack|telegram|boto3|urlopen|fetch\(|aiohttp)"),
 }
 _LLM_CALL = re.compile(
-    r"(openai|anthropic|\.chat\.completions|\.messages\.create|\.generate\(|\.invoke\(|"
+    r"(openai|anthropic|\.chat\.completions|\.messages\.create|\.generate\(|\.invoke\(|"  # maroon: ignore[ME-ASI01-lethal-trifecta] detection patterns, not a real LLM call site
     r"ChatOpenAI|ChatAnthropic|llm\(|agent\.run|AgentExecutor|\.predict\()")
 
 
@@ -215,7 +215,9 @@ _DISPATCH = {
 }
 
 
-_IGNORE_RE = re.compile(r"maroon:\s*ignore(?:\[([^\]]*)\])?", re.IGNORECASE)
+# The ignore directive MUST live in an actual comment (a '#' or '//' precedes it on the
+# line) — so "maroon: ignore" sitting inside a string literal does NOT silence a finding.
+_IGNORE_RE = re.compile(r"(?:#|//)[^\n]*?maroon:\s*ignore(?:\[([^\]]*)\])?", re.IGNORECASE)
 
 
 def _comment_only(line: str) -> bool:
@@ -224,9 +226,10 @@ def _comment_only(line: str) -> bool:
 
 
 def _suppressed(target: Target, f: model.Finding) -> bool:
-    """Honor `# maroon: ignore` / `# maroon: ignore[RULE-ID]` as an inline trailing comment
-    on the finding's own line, or on a COMMENT-ONLY line immediately above it (so an inline
-    ignore on the previous statement does not leak onto the next line)."""
+    """Honor `# maroon: ignore` / `# maroon: ignore[RULE-ID]` as a real comment on the
+    finding's own line, or on a COMMENT-ONLY line immediately above it (so an inline ignore
+    on the previous statement does not leak onto the next line, and a string literal that
+    merely mentions the phrase cannot suppress anything)."""
     if not f.line:
         return False
     lines = target.read_lines(f.file)

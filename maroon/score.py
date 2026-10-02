@@ -80,6 +80,21 @@ def _detect_controls(target: Target, findings: List[model.Finding], inv: Invento
     for c in ("audit_logging", "redaction_middleware", "per_agent_identity", "policy_as_code",
               "tenant_isolation", "schema_validation", "kill_switch"):
         controls[c] = "needs-attestation"
+
+    # Positive evidence from declared dependencies (lets a well-built repo rise above L0/L1).
+    try:
+        from .detect import _manifest_packages
+        pkgs = set(_manifest_packages(target).keys())
+    except Exception:
+        pkgs = set()
+    vault = {"hvac", "boto3", "azure-keyvault", "azure-keyvault-secrets",
+             "google-cloud-secret-manager", "keyring", "python-dotenv"}
+    if pkgs & vault and "ME-LLM08-hardcoded-secret" not in rule_ids:
+        controls["secret_management"] = "present"
+    if pkgs & {"pydantic", "marshmallow", "jsonschema", "zod"}:
+        controls["schema_validation"] = "present"
+    if pkgs & {"opa", "open-policy-agent", "opal"}:
+        controls["policy_as_code"] = "present"
     return controls
 
 

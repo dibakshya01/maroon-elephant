@@ -20,3 +20,16 @@ Running log of the autonomous build. Newest first.
   vanilla JS, maroon dark theme). Visually verified in-browser: live board + Findings/Inventory/
   Threat-Model/Governance tabs render; crown-jewels prioritization works; governance verdict shown.
 - 30 tests green; self-scan clean.
+
+## Phase 5 — Adversarial hardening
+### Round 1 (fresh devil's-hat reviewer, empirical)
+Verdict going in: strong (determinism/zero-dep/robustness/zip-guards all reproduced), but real bugs found. Fixes + attack-tests:
+- 🔴 **--baseline suppressed NEW duplicate vulns** (fingerprint collision: identical blocks at different lines shared a fingerprint → merge collapsed them + baseline hid new ones). FIX: occurrence disambiguator in correlation_key/fingerprint (`assign_occurrences`). Tests: identical-blocks-not-merged, baseline-doesn't-suppress-new-duplicate.
+- 🔴 **"self-scan clean" was dishonest** (CI native-only; .maroonignore excluded core engine files). FIX: CI self-scan is explicitly `--no-subscanners` with a precise claim; un-excluded analyzer/taint/detect — now scanned, with only the genuine pattern-definition lines inline-suppressed; grey-panda findings now honor `.maroonignore`.
+- 🟡 **git-clone arg injection + SSRF** → scheme allowlist, reject `-`-leading, `--` separator, `protocol.ext.allow=never`, block cloud-metadata/link-local hosts. Tests: 5 reject + 2 allow.
+- 🟡 **UI CSRF / DNS-rebinding / DoS** → per-process CSRF token, Host allowlist, JSON content-type required, body-size cap, bounded runs, non-loopback warning. Test: UI rejects missing-token/bad-host/bad-content-type.
+- 🟡 **Taint bypasses** (for/with/comprehension targets) → now carried. Test covers all three.
+- 🟡 **Zip-bomb** (no decompression cap) → total-size + ratio + member-count caps before extract. Test with a compressible bomb.
+- 🟡 **Inline-suppression over-suppressed** (matched inside strings) → directive must be in a real comment. Tests: in-string-not-honored, real-comment-honored.
+- ⚪ Claims reconciled: **implemented the optional BYOK LLM enrichment layer** (evidence/citation-gated, off by default, Ollama = air-gapped) so the "LLM can only describe a finding" claim holds; removed the unbuilt `[browser]` extra from README, added a `[subscanners]` extra; governance now reads positive control signals (vault/pydantic/OPA) so the AT×L maturity axis isn't permanently flat; line-length cap for ReDoS safety; grey-panda path clamped to scan root.
+- Result: **54 tests green** (16 new attack-tests), native self-scan clean, vuln fixture fires all 14 rules.

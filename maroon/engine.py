@@ -54,7 +54,7 @@ def _baseline_fingerprints(path: str) -> Set[str]:
 
 
 def scan(target_str: str, with_subscanners: bool = True, baseline: Optional[str] = None,
-         ref: Optional[str] = None) -> ScanResult:
+         ref: Optional[str] = None, provider=None) -> ScanResult:
     t0 = time.time()
     target: Target = ingest.acquire(target_str, ref)
     try:
@@ -73,6 +73,7 @@ def scan(target_str: str, with_subscanners: bool = True, baseline: Optional[str]
             except Exception:
                 pass  # sub-scanner failures never break the native run
 
+        model.assign_occurrences(findings)   # disambiguate identical findings at distinct lines
         findings = model.merge_findings(findings)
         for f in findings:
             score.score_finding(f)
@@ -80,6 +81,15 @@ def scan(target_str: str, with_subscanners: bool = True, baseline: Optional[str]
         if baseline:
             base = _baseline_fingerprints(baseline)
             findings = [f for f in findings if f.fingerprint not in base]
+
+        if provider is not None:   # optional, evidence-gated LLM enrichment (BYOK)
+            from .llm import enrich_findings
+
+            def _snippet(rel, line):
+                lines = target.read_lines(rel)
+                lo, hi = max(0, line - 3), min(len(lines), line + 2)
+                return "\n".join(lines[lo:hi])
+            enrich_findings(findings, provider, read_snippet=_snippet)
 
         governance = score.governance_verdict(target, findings, inv)
         elapsed = time.time() - t0

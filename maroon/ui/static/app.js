@@ -31,8 +31,9 @@ function startScan() {
   $("#queue").innerHTML = ""; $("#log").innerHTML = "";
   $("#scanBtn").disabled = true; $("#scanBtn").textContent = "Scanning…";
 
+  const csrf = (document.querySelector('meta[name=me-csrf]') || {}).content || "";
   fetch("/api/scan", {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json", "X-Maroon-Token": csrf },
     body: JSON.stringify({ targets, crownJewels: $("#crown").value, subscanners: $("#subs").checked }),
   }).then((r) => r.json()).then((d) => {
     if (d.error) { logLine("error: " + d.error); done(); return; }

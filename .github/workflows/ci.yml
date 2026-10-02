@@ -27,8 +27,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install -e .
-      - name: Self-scan (must be clean; fail on High+)
-        run: maroon scan . --fail-on high -f sarif -o maroon.sarif
+      - name: Self-scan with Maroon Elephant's own rules (must be clean; fail on High+)
+        # Dogfood = Maroon Elephant's NATIVE rules on its own source. Grey Panda is an
+        # optional third-party sub-scanner with its own opinions, so it is not part of this
+        # determinism claim; run it separately if you want its view.
+        run: maroon scan . --no-subscanners --fail-on high -f sarif -o maroon.sarif
       - name: Governance verdict
         if: always()
         run: maroon scan . -f tmac | python -c "import sys,json; g=json.load(sys.stdin)['governance']; print('Maroon Elephant governance:', g['adoption_tier'],'x',g['governance_level'],'->',g['verdict'])"

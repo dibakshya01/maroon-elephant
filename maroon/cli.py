@@ -33,11 +33,23 @@ def _combined_json(result) -> str:
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
+    import os
+
     from . import engine
     from .reporters import cyclonedx, sarif, terminal, tmac
+    provider = None
+    if getattr(args, "explain", False):
+        from .llm import make_provider
+        provider = make_provider(os.environ.get("MAROON_LLM_PROVIDER", ""),
+                                 os.environ.get("MAROON_LLM_MODEL", ""),
+                                 os.environ.get("MAROON_LLM_API_KEY", ""))
+        if provider is None:
+            sys.stderr.write("--explain: set MAROON_LLM_PROVIDER (anthropic|openai|google|"
+                             "ollama|lmstudio) [+ MAROON_LLM_MODEL/MAROON_LLM_API_KEY]; "
+                             "running without enrichment.\n")
     try:
         result = engine.scan(args.target, with_subscanners=not args.no_subscanners,
-                             baseline=args.baseline, ref=args.ref)
+                             baseline=args.baseline, ref=args.ref, provider=provider)
     except ValueError as e:
         sys.stderr.write("error: %s\n" % e)
         return 2
@@ -109,6 +121,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="exit 1 if any finding is at/above this severity")
     s.add_argument("--baseline", help="a prior SARIF file; suppress its findings (diff-aware)")
     s.add_argument("--no-subscanners", action="store_true", help="native rules only (skip grey-panda etc.)")
+    s.add_argument("--explain", action="store_true",
+                   help="BYOK LLM enrichment of findings (off by default; needs MAROON_LLM_* env)")
     s.add_argument("--ref", help="git ref/branch for SARIF versionControlProvenance")
     s.set_defaults(func=cmd_scan)
 

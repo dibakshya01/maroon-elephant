@@ -25,6 +25,12 @@ _RUNS: Dict[str, "queue.Queue"] = {}
 _CT = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
        ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".json": "application/json"}
 
+# Security (set in serve()): a per-process CSRF token + the Host values we answer to.
+_TOKEN = ""
+_ALLOWED_HOSTS: set = set()
+_MAX_BODY = 2_000_000          # cap POST body size
+_MAX_CONCURRENT_RUNS = 32      # cap in-flight runs (anti-DoS / leak)
+
 
 def _run_scan(run_id: str, targets, crown_jewels, subscanners):
     q = _RUNS[run_id]
@@ -52,16 +58,22 @@ class Handler(BaseHTTPRequestHandler):
         if body:
             self.wfile.write(body)
 
+    def _host_ok(self) -> bool:
+        host = (self.headers.get("Host") or "").strip()
+        return host in _ALLOWED_HOSTS if _ALLOWED_HOSTS else True
+
     def _static(self, path):
         if path in ("", "/"):
             path = "/index.html"
         rel = path[len("/static/"):] if path.startswith("/static/") else path.lstrip("/")
         full = os.path.normpath(os.path.join(_STATIC, rel))
-        if not full.startswith(_STATIC) or not os.path.isfile(full):
+        if not (full == _STATIC or full.startswith(_STATIC + os.sep)) or not os.path.isfile(full):
             return self._send(404, b"not found")
         with open(full, "rb") as fh:
             body = fh.read()
         ext = os.path.splitext(full)[1]
+        if os.path.basename(full) == "index.html":   # inject the CSRF token
+            body = body.replace(b"__ME_CSRF__", _TOKEN.encode())
         self._send(200, body, _CT.get(ext, "application/octet-stream"))
 
     # ---- routing ----
@@ -83,7 +95,17 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/api/scan":
             return self._send(404, b"not found")
-        length = int(self.headers.get("Content-Length", 0))
+        # DNS-rebinding + CSRF + content-type + body-size defenses for the local server.
+        if not self._host_ok():
+            return self._send(403, b"bad host")
+        if _TOKEN and self.headers.get("X-Maroon-Token") != _TOKEN:
+            return self._send(403, json.dumps({"error": "missing/invalid CSRF token"}).encode(), "application/json")
+        ctype = (self.headers.get("Content-Type") or "").split(";")[0].strip()
+        if ctype != "application/json":
+            return self._send(415, json.dumps({"error": "Content-Type must be application/json"}).encode(), "application/json")
+        length = int(self.headers.get("Content-Length", 0) or 0)
+        if length <= 0 or length > _MAX_BODY:
+            return self._send(413, json.dumps({"error": "body too large or empty"}).encode(), "application/json")
         try:
             data = json.loads(self.rfile.read(length) or b"{}")
         except json.JSONDecodeError:
@@ -91,6 +113,10 @@ class Handler(BaseHTTPRequestHandler):
         targets = [t.strip() for t in (data.get("targets") or []) if t.strip()]
         if not targets:
             return self._send(400, json.dumps({"error": "no targets"}).encode(), "application/json")
+        # bound in-flight runs; prune finished/abandoned ones first
+        if len(_RUNS) >= _MAX_CONCURRENT_RUNS:
+            for k in list(_RUNS)[:len(_RUNS) - _MAX_CONCURRENT_RUNS + 1]:
+                _RUNS.pop(k, None)
         run_id = uuid.uuid4().hex[:12]
         _RUNS[run_id] = queue.Queue()
         threading.Thread(target=_run_scan, args=(
@@ -99,6 +125,8 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, json.dumps({"runId": run_id}).encode(), "application/json")
 
     def _stream(self, run_id):
+        if not self._host_ok():
+            return self._send(403, b"bad host")
         q = _RUNS.get(run_id)
         if q is None:
             return self._send(404, b"unknown run")
@@ -123,8 +151,15 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def serve(host: str = "127.0.0.1", port: int = 7879, open_browser: bool = True) -> int:
+    global _TOKEN, _ALLOWED_HOSTS
+    import secrets
+    _TOKEN = secrets.token_urlsafe(24)
+    _ALLOWED_HOSTS = {"%s:%d" % (host, port), "127.0.0.1:%d" % port, "localhost:%d" % port}
     httpd = ThreadingHTTPServer((host, port), Handler)
     url = "http://%s:%d" % (host, port)
+    if host not in ("127.0.0.1", "localhost", "::1"):
+        print("⚠ binding to a non-loopback host (%s) exposes the dashboard with no auth — "
+              "only do this on a trusted network." % host)
     print("🐘 Maroon Elephant dashboard: %s   (Ctrl-C to stop)" % url)
     if open_browser:
         try:

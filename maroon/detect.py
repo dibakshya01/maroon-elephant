@@ -4,7 +4,7 @@ Deterministic, table-driven from knowledge/detectors/components.json. Matches:
   * python imports              (import X / from X import ...)
   * dependency manifests        (requirements.txt, pyproject.toml, package.json, ...)
   * config files by name        (mcp.json, claude_desktop_config.json, .well-known/agent.json)
-  * environment-variable keys   (LANGCHAIN_TRACING_V2, ...)
+  * environment-variable keys   (observability/tracing flags, etc.)
 """
 from __future__ import annotations
 

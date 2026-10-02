@@ -42,7 +42,7 @@ governance verdict, GitHub integration, and a local UI.
 - **Deterministic-first.** Every finding has `file:line` evidence. The LLM is optional and only
   *enriches* an existing deterministic finding — it can never invent one.
 - **Zero runtime dependencies.** The core is Python standard library only; everything heavier is an
-  optional extra (`[polyglot]`, `[llm]`, `[github]`, `[browser]`, `[pdf]`).
+  optional extra (`[polyglot]`, `[llm]`, `[github]`, `[subscanners]`, `[pdf]`).
 - **Local-first & BYOK.** Your source never leaves your machine by default; air-gapped mode makes
   zero external calls.
 - **Standards-anchored.** Every finding carries a cross-framework tuple (LLM / ASI / DSGAI / MAESTRO
@@ -60,6 +60,12 @@ maroon serve                       # Enterprise: local dashboard on http://local
 
 Exit codes and `--fail-on {low,medium,high,critical}` make it CI-ready; `--baseline old.sarif`
 scans diff-aware (fail only on *new* findings).
+
+> **Grey Panda** (the deterministic sub-scanner) is optional: `pip install maroon-elephant[subscanners]`
+> (or `pip install grey-panda`). Without it, Maroon Elephant's native rules still run.
+> **LLM enrichment** is off by default and BYOK — enable with `--explain` after setting
+> `MAROON_LLM_PROVIDER` (`anthropic`/`openai`/`google`/`ollama`/`lmstudio`). With no provider, or
+> with `ollama`, the scan makes **zero external calls**.
 
 ## What it produces
 
