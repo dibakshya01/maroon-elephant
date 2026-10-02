@@ -30,11 +30,10 @@ def _rules(findings: List[model.Finding]) -> List[Dict]:
             "fullDescription": {"text": f.description or f.title},
             "help": {"text": f.remediation or ""},
             "defaultConfiguration": {"level": _LEVEL.get(f.severity, "warning")},
-            "properties": {
-                "tags": ["security", "ai", "owasp"] + primaries,
-                "security-severity": str(f.severity_score if f.severity_score is not None else ""),
-            },
+            "properties": {"tags": ["security", "ai", "owasp"] + primaries},
         }
+        if f.severity_score is not None:
+            seen[f.rule_id]["properties"]["security-severity"] = str(f.severity_score)
     return list(seen.values())
 
 
@@ -47,19 +46,21 @@ def build(findings: List[model.Finding], repo_name: str = "", commit: str = "", 
                 "region": {"startLine": f.line or 1},
             }
         }
+        props = {
+            "severity": f.severity,
+            "frameworks": f.frameworks,
+            "sources": [s.to_dict() for s in f.sources],
+            "correlationKey": f.correlation_key,
+        }
+        if f.severity_score is not None:   # omit rather than emit an empty string
+            props["security-severity"] = str(f.severity_score)
         results.append({
             "ruleId": f.rule_id,
             "level": _LEVEL.get(f.severity, "warning"),
             "message": {"text": f.message or f.title},
             "locations": [loc],
             "partialFingerprints": {"maroonElephant/v1": f.fingerprint},
-            "properties": {
-                "severity": f.severity,
-                "security-severity": str(f.severity_score if f.severity_score is not None else ""),
-                "frameworks": f.frameworks,
-                "sources": [s.to_dict() for s in f.sources],
-                "correlationKey": f.correlation_key,
-            },
+            "properties": props,
         })
     run = {
         "tool": {"driver": {

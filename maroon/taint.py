@@ -134,6 +134,9 @@ def _analyze_scope(body: List[ast.stmt]) -> List[Tuple[int, str]]:
                 for gen in node.generators:
                     if _tainted_rhs(gen.iter, tainted):
                         new_targets += _target_names(gen.target)
+            elif isinstance(node, getattr(ast, "NamedExpr", ())):  # walrus (c := llm.generate())
+                if _tainted_rhs(node.value, tainted):
+                    new_targets = _target_names(node.target)
             for name in new_targets:
                 if name not in tainted:
                     tainted[name] = getattr(node, "lineno", 0)

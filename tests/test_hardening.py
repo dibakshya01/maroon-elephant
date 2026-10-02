@@ -138,11 +138,13 @@ def test_enrichment_off_by_default_makes_no_calls():
 
 def test_enrichment_citation_gate_strips_foreign_locations():
     from maroon.llm import enrich_findings
-    p = _FakeProvider("This is risky. See a.py:5 and also evil.py:999 for a backdoor.")
-    f = _finding()
+    # foreign locations in several formats: plain, space-colon, #L anchor, #n anchor
+    p = _FakeProvider("Risky at a.py:5. Also evil.py:999, sneaky.py :123, hack.py#L42, bad.py#7.")
+    f = _finding()   # a.py line 5
     enrich_findings([f], provider=p)
-    assert f.explanation and "a.py:5" in f.explanation
-    assert "evil.py:999" not in f.explanation
+    assert f.explanation and "a.py:5" in f.explanation           # own location kept
+    for foreign in ("evil.py:999", "evil.py", "sneaky.py", "hack.py", "bad.py", ":999", "#L42"):
+        assert foreign not in f.explanation, "citation-gate bypass: %r survived" % foreign
     assert "unverified location removed" in f.explanation
 
 
@@ -196,3 +198,22 @@ def test_ui_rejects_missing_csrf_and_bad_host():
     finally:
         httpd.shutdown()
         httpd.server_close()
+
+
+# ---- round 2: walrus taint + SARIF robustness ----
+def test_taint_through_walrus():
+    code = ("import os\n"
+            "def f(x):\n"
+            "    if (c := llm.generate(x)):\n"
+            "        eval(c)\n")
+    r = _scan_dir(code)
+    lines = {f.line for f in r.findings if f.rule_id == "ME-LLM10-model-output-sink"}
+    assert 4 in lines, "walrus-target taint missed"
+
+
+def test_sarif_omits_empty_security_severity():
+    f = model.Finding("R", "t", "high", "a.py", line=1,
+                      evidence_digest=model.evidence_digest_from_token("x"))  # unscored -> score None
+    doc = json.loads(sarif.dumps([f]))
+    props = doc["runs"][0]["results"][0]["properties"]
+    assert props.get("security-severity", None) != "", "empty security-severity must be omitted, not ''"

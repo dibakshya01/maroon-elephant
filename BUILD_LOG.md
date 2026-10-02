@@ -33,3 +33,12 @@ Verdict going in: strong (determinism/zero-dep/robustness/zip-guards all reprodu
 - 🟡 **Inline-suppression over-suppressed** (matched inside strings) → directive must be in a real comment. Tests: in-string-not-honored, real-comment-honored.
 - ⚪ Claims reconciled: **implemented the optional BYOK LLM enrichment layer** (evidence/citation-gated, off by default, Ollama = air-gapped) so the "LLM can only describe a finding" claim holds; removed the unbuilt `[browser]` extra from README, added a `[subscanners]` extra; governance now reads positive control signals (vault/pydantic/OPA) so the AT×L maturity axis isn't permanently flat; line-length cap for ReDoS safety; grey-panda path clamped to scan root.
 - Result: **54 tests green** (16 new attack-tests), native self-scan clean, vuln fixture fires all 14 rules.
+
+### Round 2 (reviewers hit a macOS infra watchdog twice; partial findings actioned + completed by direct empirical attack)
+Round-1 fixes that HELD under re-attack: occurrence fingerprint, git-URL validation, zip caps, suppression-in-string, UI CSRF/Host. Bypassed/new issues found + fixed:
+- 🟡 **Citation-gate bypass** in the new LLM layer: foreign locations as `f.py :999` (space-colon), `f.py#L5` / `f.py#7` (anchors) slipped past. FIX: broadened `_LOC_RE` + `_norm_loc` normalization on both sides. Test covers all formats.
+- 🟡 **Redaction gaps**: added Slack/Google/GitHub-variant/Bearer/PEM-private-key/JWT patterns.
+- 🟡 **Taint walrus bypass** `(c := llm.generate())` not tracked. FIX: handle `ast.NamedExpr`. Test added. (Tuple-unpack already caught; dynamic `getattr` sinks documented as a known limit.)
+- 🟡 **SARIF emitted `security-severity: ""`** for an unscored finding. FIX: omit the field when score is None (result + rule). Test added.
+- Verified no crash on empty repo, no-primary finding; hash-chain tamper detected; determinism holds.
+- Result: **57 tests green**, native self-scan clean.

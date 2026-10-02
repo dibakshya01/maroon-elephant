@@ -20,10 +20,20 @@ from .. import model
 _SECRET_RES = [
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
     re.compile(r"AKIA[0-9A-Z]{16}"),
-    re.compile(r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"\s]{8,}['\"]"),
-    re.compile(r"ghp_[A-Za-z0-9]{20,}"),
+    re.compile(r"(?i)(api[_-]?key|secret|token|password|passwd|pwd)\s*[:=]\s*['\"][^'\"\s]{6,}['\"]"),
+    re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),           # GitHub tokens
+    re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"),          # Slack tokens
+    re.compile(r"AIza[0-9A-Za-z_\-]{30,}"),               # Google API keys
+    re.compile(r"(?i)bearer\s+[A-Za-z0-9._\-]{20,}"),     # bearer tokens
+    re.compile(r"-----BEGIN[A-Z ]*PRIVATE KEY-----"),     # PEM private keys
+    re.compile(r"eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}"),  # JWTs
 ]
-_LOC_RE = re.compile(r"[\w./-]+\.[A-Za-z0-9]+:\d+")
+# Location-like tokens in several formats: f.py:12, f.py :12, f.py#L12, f.py#12.
+_LOC_RE = re.compile(r"[\w./\\-]+\.[A-Za-z0-9]+\s*(?::|#L?)\s*\d+")
+
+
+def _norm_loc(s: str) -> str:
+    return re.sub(r"\s*(?::|#L?)\s*", ":", s.strip().replace("\\", "/"))
 
 
 def redact(text: str) -> str:
@@ -100,11 +110,15 @@ def make_provider(name: str, model_name: str = "", api_key: str = "") -> Optiona
 
 def _citation_gate(finding: model.Finding, text: str) -> str:
     """Strip any code location the model cites that is NOT this finding's own, so enrichment
-    can only ever describe the deterministic finding."""
-    own = "%s:%s" % (finding.file, finding.line)
+    can only ever describe the deterministic finding. Normalizes location formats (f.py:12,
+    f.py :12, f.py#L12) on both sides so none slip past."""
+    own = _norm_loc("%s:%s" % (finding.file, finding.line))
 
     def repl(m):
-        return m.group(0) if m.group(0).endswith(own) or own.endswith(m.group(0)) else "[unverified location removed]"
+        norm = _norm_loc(m.group(0))
+        if norm == own or norm.endswith("/" + own) or own.endswith("/" + norm):
+            return m.group(0)
+        return "[unverified location removed]"
     return _LOC_RE.sub(repl, text)
 
 

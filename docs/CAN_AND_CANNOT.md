@@ -22,8 +22,10 @@ Honesty is a feature. Written before the code, kept current.
   or air-gapped ⇒ zero external calls; keys never logged). The optional LLM layer can only *describe* an
   existing deterministic finding (citation-gated); it never creates findings.
 - **Follow taint across functions.** The model-output→sink taint analysis is Python-only and
-  **intraprocedural** — it tracks assignments, `for`/`with`/comprehension targets within one function,
-  but does not follow values across function boundaries. Expect false negatives for cross-function flow.
+  **intraprocedural** — it tracks assignments, `for`/`with`/comprehension/walrus targets within one
+  function, but does not follow values across function boundaries, and it only recognizes *statically
+  named* sinks (it will miss a dynamically-built sink such as `getattr(os, "system")(x)`). Expect false
+  negatives for cross-function flow and obfuscated sinks.
 - **Prove the Lethal-Trifecta with data-flow.** That check is a **file-level heuristic** (untrusted-input +
   sensitive-data + egress signals anywhere in one file, near an LLM call). It is a prompt to review, not
   a proof; it can over- or under-flag.
