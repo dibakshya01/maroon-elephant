@@ -4,17 +4,12 @@ Everything buildable has been built, tested, and hardened locally. What remains 
 accounts/credentials — I can't (and shouldn't) do these for you. Ordered most-important first.
 Each item has the exact command or click.
 
-## 1. Push the code to GitHub  ⬅ do this first
-The local git repo has all commits on `main`, remote set to `github.com/dibakshya01/maroon-elephant`.
-I could not push (no `gh` CLI and no git credentials in this environment). From your machine:
+## 1. ✅ Code is pushed
+All 10 commits are on `main` at `github.com/dibakshya01/maroon-elephant` (the push succeeded from
+this session). Nothing to do here — just review the repo. (Raw OWASP PDFs are gitignored, not
+redistributed; your local copies are untouched.)
 
-```bash
-cd "/Users/dibakshya/Documents/OpenSource Projects/maroon-elephant"
-git push -u origin main
-```
-If the remote already has commits, reconcile first (`git pull --rebase origin main`) then push.
-
-## 2. Enable GitHub Pages (the landing site)
+## 2. Enable GitHub Pages (the landing site)  ⬅ do this first
 The site lives in `site/` and a deploy workflow is at `.github/workflows/pages.yml`.
 - GitHub → repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 - On the next push to `main`, the site deploys to `https://dibakshya01.github.io/maroon-elephant/`.
