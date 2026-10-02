@@ -55,6 +55,7 @@ pip install maroon-elephant
 maroon scan .                      # scan the current repo
 maroon scan https://github.com/org/repo
 maroon scan ./app --format sarif -o results.sarif
+maroon scan ./app --format html  -o report.html   # shareable threat-model report
 maroon serve                       # Enterprise: local dashboard on http://localhost:7879
 ```
 

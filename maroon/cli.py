@@ -36,7 +36,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
     import os
 
     from . import engine
-    from .reporters import cyclonedx, sarif, terminal, tmac
+    from .reporters import cyclonedx, html, sarif, terminal, tmac
     provider = None
     if getattr(args, "explain", False):
         from .llm import make_provider
@@ -61,6 +61,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
         _write(cyclonedx.dumps(result.inventory, result.name), args.output)
     elif fmt == "tmac":
         _write(tmac.dumps(result.inventory, result.findings, result.governance, result.name), args.output)
+    elif fmt == "html":
+        _write(html.dumps(result.findings, result.inventory, result.governance,
+                          result.name, result.elapsed), args.output)
     elif fmt == "mermaid":
         _write(tmac.mermaid(result.inventory), args.output)
     elif fmt == "json":
@@ -115,7 +118,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("scan", help="scan a repo (path, git URL, or .zip)")
     s.add_argument("target", help="local path, git URL, or .zip file")
     s.add_argument("-f", "--format", default="terminal",
-                   choices=["terminal", "sarif", "cyclonedx", "tmac", "mermaid", "json"])
+                   choices=["terminal", "sarif", "cyclonedx", "tmac", "mermaid", "json", "html"])
     s.add_argument("-o", "--output", help="write to a file instead of stdout")
     s.add_argument("--fail-on", choices=["info", "low", "medium", "high", "critical"],
                    help="exit 1 if any finding is at/above this severity")

@@ -37,7 +37,7 @@ Documentation = "https://dibakshya01.github.io/maroon-elephant/"
 Issues = "https://github.com/dibakshya01/maroon-elephant/issues"
 
 [project.optional-dependencies]
-polyglot = ["tree-sitter>=0.21", "tree-sitter-languages>=1.10"]
+polyglot = ["tree-sitter>=0.21", "tree-sitter-language-pack>=0.7"]
 llm = []                       # provider calls use stdlib urllib; key libs optional per provider
 github = ["PyJWT>=2.8", "cryptography>=42"]
 pdf = ["weasyprint>=60"]

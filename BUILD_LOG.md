@@ -50,3 +50,14 @@ Round-1 fixes that HELD under re-attack: occurrence fingerprint, git-URL validat
 - CLI: nonexistent/invalid target → clean error, exit 2.
 - Wheel build: **zero non-extra runtime dependencies confirmed**; 23 knowledge JSON + 3 UI assets packaged; installs + runs from a clean location.
 - No material findings → hardening concluded at 3 rounds (clean). Final: 57 tests green, self-scan clean.
+
+## Phase 3b — Finishing the remaining in-development items (post-hardening)
+- **Polyglot (JS/TS) taint via tree-sitter** (`[polyglot]` extra): real AST taint for model-output→sink
+  (eval/Function/exec/child_process/innerHTML) in JavaScript/TypeScript; graceful no-op without the extra.
+  Verified on a JS fixture (eval/exec/innerHTML caught; sanitized value not flagged). Fixed the extra to
+  `tree-sitter-language-pack`.
+- **HTML report** (`maroon scan -f html`): self-contained, styled, shareable threat-model report
+  (summary + governance verdict + findings table + AI inventory). Verified in-browser.
+- **Dependency-CVE version comparison**: compares the pinned version against the affected range and skips
+  patched versions (FP reduction); flags conservatively when a version can't be parsed. Verified.
+- 64 tests green (polyglot + CVE-version + HTML tests added); self-scan clean.

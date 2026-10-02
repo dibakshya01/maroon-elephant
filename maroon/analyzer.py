@@ -138,6 +138,41 @@ def _run_config_mcp(rule: Dict, target: Target) -> List[model.Finding]:
     return out
 
 
+_VER_RE = re.compile(r"(\d+)\.(\d+)(?:\.(\d+))?")
+
+
+def _parse_version(text: str):
+    m = _VER_RE.search(text or "")
+    if not m:
+        return None
+    return tuple(int(x) if x else 0 for x in m.groups())
+
+
+def _version_affected(installed, predicate: str) -> bool:
+    """Is `installed` within the vulnerable `predicate` ('*', '<1.9.0', '<=x', '>=x', '==x')?
+    Unknown installed version -> True (conservative: flag for review)."""
+    predicate = (predicate or "*").strip()
+    if predicate == "*":
+        return True
+    if installed is None:
+        return True
+    m = re.match(r"(<=|>=|==|<|>)\s*(.+)", predicate)
+    if not m:
+        return True
+    op, want = m.group(1), _parse_version(m.group(2))
+    if want is None:
+        return True
+    if op == "<":
+        return installed < want
+    if op == "<=":
+        return installed <= want
+    if op == ">":
+        return installed > want
+    if op == ">=":
+        return installed >= want
+    return installed == want
+
+
 def _run_dependency_cve(rule: Dict, target: Target) -> List[model.Finding]:
     from .detect import _manifest_packages
     db = kb.cve_fingerprints()
@@ -149,7 +184,16 @@ def _run_dependency_cve(rule: Dict, target: Target) -> List[model.Finding]:
     for pkg, evs in pkgs.items():
         for entry in index.get(pkg, []):
             ev = evs[0]
-            msg = "%s: %s (%s)" % (entry["cve"], entry["class"], entry.get("affected", "*"))
+            line_text = ""
+            lines = target.read_lines(ev["file"])
+            if 0 <= ev["line"] - 1 < len(lines):
+                line_text = lines[ev["line"] - 1]
+            installed = _parse_version(line_text.split(pkg, 1)[-1] if pkg in line_text else line_text)
+            affected = entry.get("affected", "*")
+            if not _version_affected(installed, affected):
+                continue  # pinned to a patched version -> not vulnerable, skip (FP avoidance)
+            vstr = ".".join(str(x) for x in installed) if installed else "unknown"
+            msg = "%s: %s (installed %s; affected %s)" % (entry["cve"], entry["class"], vstr, affected)
             f = make_finding(rule, target, ev["file"], ev["line"],
                              token="%s@%s" % (pkg, entry["cve"]), message=msg)
             f.severity = entry.get("severity", f.severity)
@@ -253,6 +297,8 @@ def analyze(target: Target) -> List[model.Finding]:
         det = rule.get("detector", "regex")
         if det == "python_ast_taint":
             findings.extend(taint.run(rule, target, make_finding))
+            from . import polyglot   # JS/TS taint via tree-sitter ([polyglot] extra); no-op if absent
+            findings.extend(polyglot.run(rule, target, make_finding))
         else:
             fn = _DISPATCH.get(det)
             if fn:

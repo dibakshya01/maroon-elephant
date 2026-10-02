@@ -29,6 +29,7 @@ Honesty is a feature. Written before the code, kept current.
 - **Prove the Lethal-Trifecta with data-flow.** That check is a **file-level heuristic** (untrusted-input +
   sensitive-data + egress signals anywhere in one file, near an LLM call). It is a prompt to review, not
   a proof; it can over- or under-flag.
-- **Match versions in the dependency-CVE check.** It flags a known-vulnerable package by *name* and shows
-  the affected range in the message; it does not yet compare your pinned version, so verify before acting.
+- **Dependency-CVE check** compares your pinned version against the affected range and skips patched
+  versions; when a version can't be parsed it flags conservatively (for review). It is fingerprint-based
+  (a curated known-exploit set), not a full SCA database — pair it with OSV-Scanner for breadth.
 - **Register/host a GitHub App or publish packages for you.** Those need your accounts → handoff.
