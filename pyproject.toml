@@ -40,13 +40,12 @@ Issues = "https://github.com/dibakshya01/maroon-elephant/issues"
 polyglot = ["tree-sitter>=0.21", "tree-sitter-language-pack>=0.7"]
 llm = []                       # provider calls use stdlib urllib; key libs optional per provider
 github = ["PyJWT>=2.8", "cryptography>=42"]
-pdf = ["weasyprint>=60"]
 yaml = ["PyYAML>=6"]            # optional authoring convenience; core reads JSON
 subscanners = ["grey-panda>=1.0.6"]   # the grey-panda deterministic sub-scanner
 dev = ["pytest>=7", "ruff>=0.4", "build>=1.0", "grey-panda>=1.0.6", "jsonschema>=4"]
 all = [
-    "tree-sitter>=0.21", "tree-sitter-languages>=1.10",
-    "PyJWT>=2.8", "cryptography>=42", "weasyprint>=60", "PyYAML>=6",
+    "tree-sitter>=0.21", "tree-sitter-language-pack>=0.7",
+    "PyJWT>=2.8", "cryptography>=42", "PyYAML>=6", "grey-panda>=1.0.6",
 ]
 
 [project.scripts]

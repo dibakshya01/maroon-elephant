@@ -42,7 +42,7 @@ governance verdict, GitHub integration, and a local UI.
 - **Deterministic-first.** Every finding has `file:line` evidence. The LLM is optional and only
   *enriches* an existing deterministic finding — it can never invent one.
 - **Zero runtime dependencies.** The core is Python standard library only; everything heavier is an
-  optional extra (`[polyglot]`, `[llm]`, `[github]`, `[subscanners]`, `[pdf]`).
+  optional extra (`[polyglot]`, `[llm]`, `[github]`, `[subscanners]`).
 - **Local-first & BYOK.** Your source never leaves your machine by default; air-gapped mode makes
   zero external calls.
 - **Standards-anchored.** Every finding carries a cross-framework tuple (LLM / ASI / DSGAI / MAESTRO
