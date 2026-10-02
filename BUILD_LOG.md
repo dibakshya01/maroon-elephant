@@ -42,3 +42,11 @@ Round-1 fixes that HELD under re-attack: occurrence fingerprint, git-URL validat
 - 🟡 **SARIF emitted `security-severity: ""`** for an unscored finding. FIX: omit the field when score is None (result + rule). Test added.
 - Verified no crash on empty repo, no-primary finding; hash-chain tamper detected; determinism holds.
 - Result: **57 tests green**, native self-scan clean.
+
+### Round 3 (direct empirical attack — came back clean)
+- MCP server: malformed/missing-param/unknown-method JSON-RPC all handled, no crash.
+- Reporters: adversarial findings (unicode, null bytes, 100k-char message, RTL overrides) → valid JSON / no crash across SARIF, CycloneDX, terminal.
+- Determinism: two in-process scans of the vuln fixture → identical fingerprint sequence.
+- CLI: nonexistent/invalid target → clean error, exit 2.
+- Wheel build: **zero non-extra runtime dependencies confirmed**; 23 knowledge JSON + 3 UI assets packaged; installs + runs from a clean location.
+- No material findings → hardening concluded at 3 rounds (clean). Final: 57 tests green, self-scan clean.
