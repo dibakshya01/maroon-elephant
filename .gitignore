@@ -40,3 +40,6 @@ LAUNCH.md
 # Node (VS Code extension / tooling)
 node_modules/
 *.vsix
+
+# OWASP source PDFs — reference material, not redistributed in the repo (see NOTICE for attribution).
+*.pdf
