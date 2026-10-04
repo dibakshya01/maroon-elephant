@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "Pre-registered benchmark labels (Build Plan §19.5). The positive set is fixed BEFORE rule tuning; recall denominator = this set. Fixtures live in benchmarks/fixtures/.",
+    "description": "Pre-registered benchmark labels (Build Plan \u00a719.5). The positive set is fixed BEFORE rule tuning; recall denominator = this set. Fixtures live in benchmarks/fixtures/.",
     "version": "1"
   },
   "vuln_app": {
@@ -18,7 +18,12 @@
       "ME-DSGAI05-archive-extract",
       "ME-MCP-client-config",
       "ME-MCP-server-transport",
-      "ME-SCA-known-cve"
+      "ME-SCA-known-cve",
+      "ME-LLM10-unsafe-render",
+      "ME-LLM05-template-ssti",
+      "ME-DSGAI16-extension-overreach",
+      "ME-DSGAI18-logprobs-exposed",
+      "ME-LLM04-insecure-fetch"
     ],
     "expected_tier": "AT6",
     "expected_verdict": "CRITICAL GAP"

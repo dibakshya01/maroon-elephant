@@ -1,0 +1,5 @@
+{
+  "name": "ai-sidebar",
+  "version": "1.0.0",
+  "permissions": ["<all_urls>", "tabs", "clipboardRead", "nativeMessaging"]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "ME-LLM05-template-ssti",
+  "title": "Non-sandboxed Jinja2 environment (SSTI)",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "medium",
+  "primary": "LLM05",
+  "also": [
+    "DSGAI04",
+    "LLM10"
+  ],
+  "languages": [
+    "python"
+  ],
+  "patterns": [
+    {
+      "pattern": "jinja2\\.Environment\\s*\\(",
+      "message": "jinja2.Environment is NOT sandboxed \u2014 rendering model/user-controlled templates (e.g. chat templates) enables SSTI/RCE."
+    }
+  ],
+  "exclude_if_line_matches": "(SandboxedEnvironment|maroon:\\s*ignore)",
+  "remediation": "Use jinja2.sandbox.SandboxedEnvironment for any template whose source or context is untrusted; verify chat-template/tokenizer artifacts before load."
+}

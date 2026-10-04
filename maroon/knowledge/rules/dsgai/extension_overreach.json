@@ -1,0 +1,34 @@
+{
+  "id": "ME-DSGAI16-extension-overreach",
+  "title": "Over-broad browser/IDE extension permissions",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "DSGAI16",
+  "also": [
+    "LLM02"
+  ],
+  "path_globs": [
+    "manifest.json"
+  ],
+  "patterns": [
+    {
+      "pattern": "\\\"<all_urls>\\\"",
+      "message": "Extension requests <all_urls> \u2014 can read/modify every page (AI-assistant exfil surface)."
+    },
+    {
+      "pattern": "\\\"nativeMessaging\\\"",
+      "message": "Extension requests nativeMessaging \u2014 can talk to local host processes."
+    },
+    {
+      "pattern": "\\\"clipboardRead\\\"",
+      "message": "Extension can read the clipboard (credential/secret harvesting surface)."
+    },
+    {
+      "pattern": "\\\"debugger\\\"",
+      "message": "Extension requests the debugger permission (full control of inspected targets)."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Minimize permissions: site/project-scoped host access, no clipboard/nativeMessaging/debugger unless essential; review on each update."
+}

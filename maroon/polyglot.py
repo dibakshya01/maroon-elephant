@@ -18,7 +18,7 @@ _MODEL_RE = re.compile(
 _SINK_FUNCS = {"eval", "Function", "exec", "execSync", "spawn", "spawnSync",
                "runInNewContext", "runInThisContext", "compileFunction"}
 _SINK_MEMBER = re.compile(r"\b(exec|execSync|runInNewContext|query|run|raw)$")
-_HTML_SINK = re.compile(r"(innerHTML|outerHTML|dangerouslySetInnerHTML)$")
+_HTML_SINK = re.compile(r"(innerHTML|outerHTML|dangerouslySetInnerHTML)$")  # maroon: ignore[ME-LLM10-unsafe-render] detection pattern, not a render site
 
 
 def available() -> bool:

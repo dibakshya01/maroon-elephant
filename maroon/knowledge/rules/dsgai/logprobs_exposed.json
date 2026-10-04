@@ -1,0 +1,29 @@
+{
+  "id": "ME-DSGAI18-logprobs-exposed",
+  "title": "Token log-probabilities exposed",
+  "detector": "regex",
+  "severity": "medium",
+  "confidence": "medium",
+  "primary": "DSGAI18",
+  "also": [
+    "LLM02",
+    "LLM06"
+  ],
+  "languages": [
+    "python",
+    "javascript",
+    "typescript"
+  ],
+  "patterns": [
+    {
+      "pattern": "logprobs\\s*=\\s*True",
+      "message": "Requesting logprobs \u2014 exposing token probabilities accelerates model extraction & membership inference."
+    },
+    {
+      "pattern": "top_logprobs\\s*=",
+      "message": "Exposing top_logprobs leaks token probabilities (extraction/membership-oracle risk)."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Do not return logprobs/top_logprobs/confidence on production endpoints; gate behind auth + rate limits if needed."
+}

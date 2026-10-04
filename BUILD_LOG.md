@@ -61,3 +61,12 @@ Round-1 fixes that HELD under re-attack: occurrence fingerprint, git-URL validat
 - **Dependency-CVE version comparison**: compares the pinned version against the affected range and skips
   patched versions (FP reduction); flags conservatively when a version can't be parsed. Verified.
 - 64 tests green (polyglot + CVE-version + HTML tests added); self-scan clean.
+
+## Phase 3c — Broadening rule coverage (toward the v1.0 coverage metric)
+Added 5 high-value, cleanly-detectable rules (+fixtures, +LABELS) → 20 rules total:
+- ME-LLM10-unsafe-render (dangerouslySetInnerHTML / v-html / mark_safe / render_template_string / autoescape off)
+- ME-LLM05-template-ssti (non-sandboxed jinja2.Environment)
+- ME-DSGAI16-extension-overreach (manifest.json: <all_urls>/nativeMessaging/clipboardRead/debugger)
+- ME-DSGAI18-logprobs-exposed (logprobs=True / top_logprobs)
+- ME-LLM04-insecure-fetch (curl|sh / wget|bash pipe-to-shell)
+All fire on fixtures; clean_app stays 0 FPs; self-scan clean (2 scanner-scanning-itself hits inline-suppressed/reworded). vuln fixture: 19 must-fire rules, CRITICAL GAP. 64 tests green.

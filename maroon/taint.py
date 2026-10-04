@@ -2,8 +2,8 @@
 
 Deterministic, function-scoped, zero-dep (Python `ast`). Taints variables assigned from a
 model call (or derived from a tainted variable, via fixpoint), then flags dangerous sinks
-(exec/eval/compile, os.system, subprocess, cursor.execute, dangerouslySetInnerHTML-style
-template interpolation) that reference a tainted value. Maps to LLM10 / ASI05 / LLM03.
+(exec/eval/compile, os.system, subprocess, cursor.execute, unescaped DOM/template
+interpolation) that reference a tainted value. Maps to LLM10 / ASI05 / LLM03.
 """
 from __future__ import annotations
 

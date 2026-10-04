@@ -1,0 +1,35 @@
+{
+  "id": "ME-LLM10-unsafe-render",
+  "title": "Unescaped output rendering (XSS)",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "LLM10",
+  "also": [
+    "ASI05"
+  ],
+  "patterns": [
+    {
+      "pattern": "dangerouslySetInnerHTML",
+      "message": "React dangerouslySetInnerHTML renders unescaped HTML \u2014 if it carries model/user output this is XSS."
+    },
+    {
+      "pattern": "v-html\\s*=",
+      "message": "Vue v-html renders unescaped HTML (XSS risk for model/user output)."
+    },
+    {
+      "pattern": "mark_safe\\s*\\(",
+      "message": "Django mark_safe() disables escaping \u2014 XSS if the value is model/user-derived."
+    },
+    {
+      "pattern": "render_template_string\\s*\\(",
+      "message": "Flask render_template_string() on dynamic input is SSTI/XSS-prone."
+    },
+    {
+      "pattern": "autoescape\\s+false",
+      "message": "Template autoescape disabled \u2014 output is not HTML-escaped."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Context-encode model/user output; keep template autoescaping on; never mark LLM output safe."
+}

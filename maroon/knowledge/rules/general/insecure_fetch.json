@@ -1,0 +1,24 @@
+{
+  "id": "ME-LLM04-insecure-fetch",
+  "title": "Pipe-to-shell install (supply chain)",
+  "detector": "regex",
+  "severity": "high",
+  "confidence": "high",
+  "primary": "LLM04",
+  "also": [
+    "ASI04",
+    "ASI05"
+  ],
+  "patterns": [
+    {
+      "pattern": "\\bcurl\\b[^\\n|]*\\|\\s*(sudo\\s+)?(sh|bash)",
+      "message": "curl | sh executes a remote script unverified (supply-chain RCE)."
+    },
+    {
+      "pattern": "\\bwget\\b[^\\n|]*\\|\\s*(sudo\\s+)?(sh|bash)",
+      "message": "wget | bash executes a remote script unverified (supply-chain RCE)."
+    }
+  ],
+  "exclude_if_line_matches": "maroon:\\s*ignore",
+  "remediation": "Download, pin by checksum/signature, and review before executing; avoid piping remote scripts straight to a shell."
+}
